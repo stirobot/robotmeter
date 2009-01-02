@@ -1,4 +1,4 @@
-#How the accelerometer works
+#How the accelerometer works.
 ===== Accelerometer =====
 
 This sensor measures the G forces +/-2G's on the car at any given time.  Logging these may give reasonable estimates of braking power, cornering ability and horsepower.
