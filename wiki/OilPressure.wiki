@@ -1,0 +1,55 @@
+#labels Phase-Implementation
+#How the oil pressure senders work
+
+===== Oil Pressure =====
+
+The preferred oil pressure sender is an autometer 100 psi unit model #2242.
+
+This sender is set up in a voltage divider with the sensor as R2 and R1 as a 100 Ohm resistor.
+{{{
+  long lookup_oil_psi(long psival){
+   if (psival > 722){
+     return (0);
+   }
+   if (psival < 257){
+     return(9999);
+   }
+   if ((psival <= 722)&&(psival > 619)) {
+     return 1747 - (psival*240)/100; 
+   } 
+   if ((psival <= 619)&&(psival > 520)) {
+     return 1802 - (psival*250)/100;
+   }
+   if ((psival <= 520)&&(psival > 411)) {
+     return 1694 - (psival*230)/100;     
+   }
+   if ((psival <= 411)&&(psival > 257)){
+     return 1418 - (psival*160)/100;
+   }
+  }
+}}}
+Oil pressure sender used is an ISSPRO 33-240 Ohm 0-150psi sender.  Any of their senders with these values will work.
+
+This sender is set up in a voltage divider with the sensor as R2 and R1 as a 100 Ohm resistor.
+{{{
+   long lookup_oil_psi(long psival){
+   if (psival > 722){
+     return (0);
+   }
+   if (psival < 257){
+     return(9999);
+   }
+   if ((psival <= 722)&&(psival > 619)) {
+     return 2620 - (psival*361)/100; 
+   } 
+   if ((psival <= 619)&&(psival > 520)) {
+     return 2703 - (psival*379)/100;
+   }
+   if ((psival <= 520)&&(psival > 411)) {
+     return 2542 - (psival*344)/100;     
+   }
+   if ((psival <= 411)&&(psival > 257)){
+     return 2127 - (psival*244)/100;
+   }
+   }
+}}}
