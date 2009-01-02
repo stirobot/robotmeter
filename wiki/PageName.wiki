@@ -1,0 +1,23 @@
+#summary One-sentence summary of this page.
+#labels Deprecated
+
+===== Button Control =====
+The buttons used are generic SPST normally open momentary switches.  These come with two leads and are configured as such:
+
+IMAGE PLACE HOLDER
+
+
+For more information on button wiring check: [http://www.arduino.cc/en/Tutorial/Button Arduino.cc button tutorial]
+
+===== Button Debouncing =====
+
+Certain care is necessary when using buttons for control.  One wishes to capture only the single push of a button and not multiple presses.  This can be controlled by the use of while statements such as these from the boost gauge function:
+{{{
+  while (digitalRead(buttonBpin) == HIGH){
+     //wait for timing T2
+     if (digitalRead(buttonApin) == LOW){
+      return;
+     }
+  ...
+}}}
+It is also possible to achieve the same effect by following this tutorial: [http://www.arduino.cc/en/Tutorial/Debounce Arduino.cc button debounce tutorial]
