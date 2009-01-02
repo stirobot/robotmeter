@@ -8,7 +8,7 @@ This is the Lap Timer code.  The timer is based on a 9hour timer that runs the m
 TODO for this code: Make each timer start and stop separately with hold to reset and double (A+B) button press to change modes.
 
 A global variable stores the times so that even when switching modes the timer continues to 'run'.
-}}}
+{{{
   int timer_state = 0;
   long tempmillisT1 = 0;
   long tempmillisT2 = 0;
