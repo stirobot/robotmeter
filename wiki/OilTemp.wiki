@@ -1,0 +1,66 @@
+#labels Phase-Implementation
+#How the oil temp senders work
+
+===== Oil Temperature Sender =====
+
+Oil temperature sender is a ISSPRO sender (part R8958).  I chose this sender because it comes in a number of different thread types/sizes. 
+
+ISSPRO was kind enough to provide an RT curve for this sender: [http://robotmeter/meter/OilTempThermistorTBcodeGS.pdf OilTemp.pdf]
+
+For this code to work the sender should be set up as R2 with R1 as a 220 Ohm resistor.
+{{{
+  long lookup_oil_temp(long tval){
+  tval = tval * 1000; //added an extra 0
+  if (tval <= 11500){
+    return (9999); 
+  }
+  if (tval >= 68100){
+    return (0);
+  }
+  if ((tval <= 68000)&&(tval > 39600)){
+    return (long)(((tval-134266)*10)/(-473));
+  }
+  if ((tval <= 39600)&&(tval > 28200)){
+    return (long)(((tval-115600)*10)/(-380));
+  }
+  if ((tval <= 28200)&&(tval > 19700)){
+    return (long)(((tval-93366)*10)/(-283));
+  }  
+  if ((tval <= 19700)&&(tval > 11600)){
+    return (long)(((tval-54800)*10)/(-135));
+  }  
+  }
+}}}
+
+Autometer 2258 oil temp sender curve (a beta tester was unhappy with the workmanship on the isspro senders so I came up with alternates):
+
+  //code for autometer 2258 sender
+{{{
+  long lookup_oil_temp(long tval){
+   tval = tval * 1000
+   if (tval <= 84000){
+      return (0);
+   }
+   if (tval >= 854000){
+     return (9999);
+   }
+   if ((tval > 84000) && (tval <= 182860)
+     return (long)((tval * 4)/10 + 67400)/100;
+   }
+   if ((tval > 182860) && (tval <= 290080)
+     return (long)((tval * 28)/100 + 89450)/100;
+   }
+   if ((tval > 290080) && (tval <= 459190)
+     return (long)((tval * 24)/100 + 101590)/100;
+   }
+   if ((tval > 459190) && (tval <= 541800)
+     return (long)((tval * 24)/100 + 98580)/100;
+   }   
+   if ((tval > 541800) && (tval <= 721130)
+     return (long)((tval * 28)/100 + 77720)/100;
+   } 
+   if ((tval > 721130) && (tval <= 853330)
+     return (long)((tval * 45)/100 - 46240)/100;
+   }    
+  }
+}}}
