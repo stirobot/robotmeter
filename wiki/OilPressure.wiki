@@ -5,6 +5,8 @@
 
 The preferred oil pressure sender is an autometer 100 psi unit model #2242.
 
+[http://robotmeter.com/meter/sensorcurves/autometer.pdf Autometer curves]
+
 This sender is set up in a voltage divider with the sensor as R2 and R1 as a 100 Ohm resistor.
 {{{
   long lookup_oil_psi(long psival){
@@ -29,6 +31,8 @@ This sender is set up in a voltage divider with the sensor as R2 and R1 as a 100
   }
 }}}
 Oil pressure sender used is an ISSPRO 33-240 Ohm 0-150psi sender.  Any of their senders with these values will work.
+
+[http://robotmeter.com/meter/sensorcurves/R9279FAM.pdf ISSPRO curves]
 
 This sender is set up in a voltage divider with the sensor as R2 and R1 as a 100 Ohm resistor.
 {{{
