@@ -3,7 +3,23 @@
 
 ===== Oil Pressure =====
 
-The preferred oil pressure sender is an autometer 100 psi unit model #2242.
+The preferred oil pressure sender is a defi unit. These things are pricey, but very well made.  Note that the curve given here was not willingly given (an email exchange resulted in them not providing me with datasheets.  All other manufacturers listed provided me with datasheets) by defi/nippon-seiki and was obtained by checking measurements and looking at the few datasheets available on the nippon seiki webpage(http://www.nippon-seiki.co.jp/e_keiki/press/mid_p_e.pdf).
+
+{{{
+long lookup_oil_psi(long psival){
+ if (psival < 102){
+   return 0;
+ }
+ if (psival > 922){
+  return 9999; 
+ }
+ else {
+  return (psival*14)/10 - 144;
+ }
+}
+}}}
+
+The 2nd preferred oil pressure sender is an autometer 100 psi unit model #2242.
 
 [http://robotmeter.com/meter/sensorcurves/autometer.pdf Autometer curves]
 
