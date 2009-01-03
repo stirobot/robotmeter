@@ -4,7 +4,7 @@
 ===== Button Control =====
 The buttons used are generic SPST normally open momentary switches.  These come with two leads and are configured as such:
 
-IMAGE PLACE HOLDER
+http://robotmeter.com/meter/pictures/buttonwiring.jpg
 
 
 For more information on button wiring check: [http://www.arduino.cc/en/Tutorial/Button Arduino.cc button tutorial]
