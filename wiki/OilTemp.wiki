@@ -5,7 +5,7 @@
 
 Oil temperature sender is a ISSPRO sender, part R8958.  I chose this sender because it comes in a number of different thread types/sizes. 
 
-ISSPRO was kind enough to provide an RT curve for this sender: [http://robotmeter/meter/OilTempThermistorTBcodeGS.pdf OilTemp.pdf] TODO: FIX LINK
+ISSPRO was kind enough to provide an RT curve for this sender: [http://robotmeter/meter/sensorcurves/OilTempThermistorTBcodeGS.pdf OilTemp pdf] TODO: FIX LINK
 
 For this code to work the sender should be set up as R2 with R1 as a 220 Ohm resistor.
 {{{
