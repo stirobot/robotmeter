@@ -3,6 +3,41 @@
 
 ===== Oil Temperature Sender =====
 
+The preferred oil temperature sender is a nippon-seiki/defi unit.  These are very pricey, but very well made.  Note that the curve presented here was not provided by nippon-seiki and was determined using cooking oil, a multimeter, and a candy thermometer. 
+
+[http://robotmeter.com/meter/sensorcurves/defisenders.ods OpenOffice doc with defi oil temp curve]
+
+The code is incomplete and untested
+}}}
+//code for defi/nippon-seiki temp sender  
+long lookup_oil_temp(long tval){
+//FIX DECIMAL PROBLEM...REMEBRE
+  if (tval <= 200){
+    return 0;
+  }
+  
+  if (tval > 200 && tval <= 315){
+    //return .37 * tval + 47.74;
+    return (37 * tval + 4774);
+  }
+  
+  if (tval > 315 && tval <= 477){
+    //return .28 * tval + 71.3;
+    return (28 * tval + 7130);
+  }
+  
+  if (tval > 477 && tval <= 790){
+    //return .33 * tval + 35.59;
+    return (33 * tval + 3559);
+  }
+  
+  if (tval > 790){
+    return 9999;
+  } 
+  
+}
+}}}
+
 Oil temperature sender is a ISSPRO sender, part R8958.  I chose this sender because it comes in a number of different thread types/sizes. 
 
 ISSPRO was kind enough to provide an RT curve for this sender: [http://robotmeter/meter/sensorcurves/OilTempThermistorTBcodeGS.pdf OilTemp pdf] TODO: FIX LINK
