@@ -69,6 +69,9 @@ For this code to work the sender should be set up as R2 with R1 as a 220 Ohm res
 
 Autometer 2258 oil temp sender curve (a beta tester was unhappy with the workmanship on the isspro senders so I came up with alternates):
 
+[http://robotmeter.com/meter/sensorcurves/autometer.pdf pdf of autometer curves]
+[http://robotmeter.com/meter/sensorcurves/autometertempsender.ods OpenOffice document of temp sensor curve figured for the following code]
+
   //code for autometer 2258 sender
 {{{
   long lookup_oil_temp(long tval){
