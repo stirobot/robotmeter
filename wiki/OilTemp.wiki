@@ -8,7 +8,7 @@ The preferred oil temperature sender is a nippon-seiki/defi unit.  These are ver
 [http://robotmeter.com/meter/sensorcurves/defisenders.ods OpenOffice doc with defi oil temp curve]
 
 The code is incomplete and untested
-}}}
+{{{
 //code for defi/nippon-seiki temp sender  
 long lookup_oil_temp(long tval){
 //FIX DECIMAL PROBLEM...REMEBRE
