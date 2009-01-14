@@ -138,6 +138,7 @@ int severeT1 = 300;
 int severeT2 = 300;
 
 int gauge = 1; //gauge mode
+boolean gaugedrawswitch = 0;
 
 void setup (){
 
@@ -165,12 +166,15 @@ void loop() {
   float temp1 = 1;
   float temp2 = 1;
   float accelx = 0, accely = 0;
+  
+  float o_oil_temp = 0;
+  float o_boost = 0; 
   //gauge on left side
   if (gauge == 1){
-    oil_temp_gauge(oil_temp);
+    oil_temp_gauge(oil_temp, o_oil_temp);
   }
   else if (gauge == 1){
-    boost_gauge(boost);
+    boost_gauge(boost, o_boost);
   }
   else if (gauge == 3){
     temp_gauge(temp1, temp2);
@@ -184,11 +188,18 @@ void loop() {
   
 }
 
-void oil_temp_gauge(){
+void oil_temp_gauge(float oil_temp, float o_oil_temp){
  float endy, endx, o_endx, o_endy;
  float tangle;
+
  //display the oil temp gauge background
- bmp_draw("oilgaug",0,0);
+ if (gaugedrawswitch == 0){
+     lcd_clearScreen(mblack);
+     bmp_draw("oilgaug",0,0);
+     bmp_draw("accelbk",0,227);
+     bmp_draw("brchart",180,0);
+     gaugedrawswitch = 1;
+  }
   while (!(touch_get_cursor(&m_point))){
    //if warmed and not previously warmed then flash message
    if ( (oil_temp_startup == false) && (oil_temp >= oil_temp_warn) ){
@@ -266,24 +277,30 @@ void oil_temp_gauge(){
    lcd_puts(char_oil_temp, 80, 72, gaugeRed, mblack);
    //delay(500); //for testing
    //bmp_draw("oilgaug",0,0);
-   return();
+   return;
   }
-  while (touch_get_cursor(&m_point)){} //debounce
-  boost_gauge(); //next gauge
+  while (touch_get_cursor(&m_point)){ } //debounce
+  gauge++;
+  return;
 }
 
 //*TODO fill out temp_gauge based on oil_temp, but draw 2 needles
-void temp_gauge(){
+void temp_gauge(float temp1, float temp2){
 
-  return();
+  return;
 }
 
-void boost_gauge(){
+void boost_gauge(float boost, float o_boost){
   float endy, endx, o_endy, o_endx;
   float tangle;
-  float boost = 0.0, o_boost = 0.0;
   //display the boost gauge background
-  bmp_draw("bstgaug",0,0);
+  if (gaugedrawswitch == 0){
+   lcd_clearScreen(mblack);
+   bmp_draw("bstgaug",0,0);
+   bmp_draw("accelbk",0,227);
+   bmp_draw("brchart",180,0);
+   gaugedrawswitch = 1;
+  }
   //loop
   while (!(touch_get_cursor(&m_point))){
      //get boost reading
@@ -341,16 +358,12 @@ void boost_gauge(){
   }
   while (touch_get_cursor(&m_point)){}
   //go to the next display if a touch is detected
-  four_bar();
+  gauge++;
+  return;
 }
 
-void four_bar(){
-  //for debugging
-  float boost = 0;
-  float oilT = 0;
-  float T1 = 0; 
-  float T2 = 0;
-  bmp_draw("fourbar",0,0);
+//*TODO: move bars and modify code to click on bar to change round gauge
+void four_bar(float oilT, float boost, float T1, float T2){
   while (!(touch_get_cursor(&m_point))){
     //get Boost, OilT, T1, and T2
     boost++;
@@ -365,30 +378,30 @@ void four_bar(){
     //draw rectangles inside rectangles 
     //only 86 ticks on a bar
       //lcd_clear (x, y, x1, y2, fill); //draws a solid rect fill with no border
-      //bst rect = (39, 13) to (125, 33)
+      //bst rect = (old 128)(39, 13) to (125, 33) (320x240)[(219,27),(305,47)]
       if (boost >= severeBoost){conditionColor = fadedRed;}
       else if (boost >= warnBoost){conditionColor = fadedYellow;}
       else {conditionColor = fadedGreen;}
-      lcd_rectangle(39,13,(int(39.0+(boost * 86.0/maxBoost))),33,conditionColor,conditionColor);
-      lcd_rectangle(int((39.0+(boost * 86.0/(float)maxBoost))),13,125,33,mblack,mblack); //blacken the rest 
-      //oilt rect = (39, 38) to (125, 58)
+      lcd_rectangle(219,27,(int(219+(boost * 86.0/maxBoost))),47,conditionColor,conditionColor);
+      lcd_rectangle(int((219+(boost * 86.0/(float)maxBoost))),27,305,47,mblack,mblack); //blacken the rest 
+      //oilt rect = (old 128)(39, 38) to (125, 58)  (320x240)[(219,63),(305,83)]
       if (oilT >= severeOilT){conditionColor = fadedRed;}
       else if (oilT >= warnOilT){conditionColor = fadedYellow;}
       else {conditionColor = fadedGreen;}
-      lcd_rectangle(39,38,(39+(oilT * 86/maxOilT)),58,conditionColor,conditionColor);
-      lcd_rectangle((39+(oilT * 86/maxOilT)),38,125,58,mblack,mblack);
-      //t1 rect = (39, 64) to (125, 84)
+      lcd_rectangle(219,63,(219+(oilT * 86/maxOilT)),83,conditionColor,conditionColor);
+      lcd_rectangle((219+(oilT * 86/maxOilT)),63,305,83,mblack,mblack);
+      //t1 rect = (old 128) (39, 64) to (125, 84)  (320x240)[(219,99),(305,119)]
       if (T1 >= severeT1){conditionColor = fadedRed;}
       else if (T1 >= warnT1){conditionColor = fadedYellow;}
       else {conditionColor = fadedGreen;}
-      lcd_rectangle(39,64,(39+(T1 * 86/maxT1)),84,conditionColor,conditionColor);
-      lcd_rectangle((39+(T1 * 86/maxT1)),64,125,84,mblack,mblack);      
-      //T2 rect = (39, 90) to (125, 110)
+      lcd_rectangle(219,99,(219+(T1 * 86/maxT1)),119,conditionColor,conditionColor);
+      lcd_rectangle((219+(T1 * 86/maxT1)),99,125,119,mblack,mblack);      
+      //T2 rect = (old 128)(39, 90) to (125, 110) (320x240)[(219,136),(305,156)]
       if (T2 >= severeT2){conditionColor = fadedRed;}
       else if (T2 >= warnT2){conditionColor = fadedYellow;}
       else {conditionColor = fadedGreen;}
-      lcd_rectangle(39,90,(39+(T2 * 86/maxT2)),110,conditionColor,conditionColor);
-      lcd_rectangle((39+(T2 * 86/maxT2)),90,125,110,mblack,mblack);
+      lcd_rectangle(219,136,(219+(T2 * 86/maxT2)),156,conditionColor,conditionColor);
+      lcd_rectangle((219+(T2 * 86/maxT2)),136,305,156,mblack,mblack);
     //print values on top of bars in white
     char out[7];
     fmtDouble(boost, 2, out, 7);
@@ -413,107 +426,12 @@ void four_bar(){
   if (pointInRect(m_point,boostRect)){boost_gauge();}
   if (pointInRect(m_point,oilRect)){oil_temp_gauge();}
   }
-  xygraph(); //click anywhere else and it goes to xygraph
-  
+  return;
 }
 
-void xygraph(){//won't work until they start fixing the lines code
-  int xs[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  int ys[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  int curx=0;
-  int cury=0;
-  int erasex=0;
-  int erasey=0;
-  bmp_draw("xygraph",0,0);
-  
-   while (!(touch_get_cursor(&m_point))){
-     //get x and y from acceleromter from arduino
-     int curx=random(0 ,200);
-     int cury=random(0, 200);
-     //draw an x and y dot where it goes //line is better
-     //lcd_pixel(curx, cury, white);
-    stroke(255,255,255);
-    line(curx, cury, xs[19], ys[19]);  //add scaling stuff (scale 2.00 G's (200) to 64 pixel spaces)
-     //store that dot in an array
-     erasex = xs[0];
-     erasey = ys[0];
-     for (int j=0; j>=18; j++){
-       xs[j]=xs[j+1];
-       ys[j]=ys[j+1];
-     }
-     xs[19]=curx;
-     ys[19]=cury;
-     //undraw the last dot in the array and remove it from the array
-       //problem because we dont know if the pixel used to be black or one of the circles
-     stroke(255,255,255);
-     line(erasex, erasey, xs[0], ys[0]); //add scaling stuff
-     //write the numbers in the correct position
-   //when a touch is detected go to the next gauge
-   }
-   while (touch_get_cursor(&m_point)){} //debounce
-   
-   four_line();
-   
+void accelDisplay(float x, float y){
+  return();
 }
-
-void four_line(){ //won't work until they fix lines code
-  //display the four line background
-   bmp_draw("lingrph",0,0);
-   while (!(touch_get_cursor(&m_point))){
-    //check for touch w/debounce
-    //get boost, oilT, T1, T2 readings
-    //store current reading at and of array...bump out the last reading of the array
-    //draw boost line purple
-    //draw oil line green
-    //draw t1 line yellow
-    //draw t2 line red
-  //when a touch is detected if it is boost or oil go to that guage
-  //else go to the next mode
-   }
-   
-   while (touch_get_cursor(&m_point)){} //debounce
-   
-  touch_timer();
-}
-
-void touch_timer(){
-  LCD_RECT timerRect; timerRect.left = 0; timerRect.right = 128; timerRect.top = 46; timerRect.bottom = 66;
-  lcd_clearScreen(mblack);
-  while (!(touch_get_cursor(&m_point))){
-  //what timer mode?
-    if (timermode == 0){ //stopped mode
-    //TODO: print 00:00:00.00 to screen in bignum, centered
-     while (!(touch_get_cursor(&m_point))){}
-     while ((touch_get_cursor(&m_point))){} //debounce
-        //if it is outside numbers go to next display mode
-        if (!pointInRect(m_point,timerRect)){oil_temp_gauge();}
-        //if it is on numbers go to mode 1
-        if (pointInRect(m_point,timerRect)){
-           //store millis of start time
-           timerStartMillis = millis();
-           timermode = 1;
-        }
-    }
-    if (timermode == 1){ //running and screen mode
-      while (!(touch_get_cursor(&m_point))){
-       //TODO: display code for running timer goes here 
-       //current timer value = millis() - timer start
-      }
-      while (touch_get_cursor(&m_point)){} //debounce
-        //if it is on numbers go to mode 2
-      if (pointInRect(m_point,timerRect)){
-        timermode == 0;
-        timerStoppedMillis = 0;
-        touch_timer();
-      }
-    }
-    //if it is outside go to next display mode
-    if (!(pointInRect(m_point,timerRect))){
-        oil_temp_gauge();
-    }
-  }
-}
-
 
 //misc functions
 
