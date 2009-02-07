@@ -30,20 +30,25 @@ void loop() {
   text("  temperature 1: ", 18, 58);
   text("  temperature 2: ", 18, 78);
   text("accelerometer x: ", 18, 98);
-  text("accelerometer y: ", 18, 118);
   
   while (!(touch_get_cursor(&m_point))){
-    //get data here
-    int getValue = Serial.read();
-    getValue = (getValue < < 8) + Serial.read();
-  
+    Serial.print('U'); //handshake
+    while (Serial.read() != 'U'){}
+    Serial.print('F'); //request for data block
+    boost = getAValue();
+    oilT = getAValue(); 
+    temp1 = getAValue();
+    temp2 = getAValue();
+    Serial.print('U'); //handshake
+    while (Serial.read() != 'U'){}
+    Serial.print('X'); //request a data block
+    accelx = getAValue();
     //display data here
     text((float)boost, 100, 18);
     text((float)oilT, 100, 38);
     text((float)temp1, 100, 58);
     text((float)temp2, 100, 78);
     text((float)accelx, 100, 98);
-    text((float)accely, 100, 118);
   
     delay(100); //delay so things are readable
   }
@@ -54,4 +59,13 @@ void loop() {
   //wait until screen is touched
   while(!touch_get_cursor(&m_point)){}
   while(touch_get_cursor(&m_point)){}
+}
+
+float getAValue(){
+  float getValue = Serial.read();
+  getValue = (getValue << 8) + Serial.read(); 
+  getValue = (getValue << 16) + Serial.read();
+  getValue = (getValue << 24) + Serial.read();
+  Serial.print('C');
+  return getValue;
 }
