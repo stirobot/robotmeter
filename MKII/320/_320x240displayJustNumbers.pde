@@ -13,10 +13,10 @@ float accelx = 0;
 POINT m_point;
 
 void setup (){
-  
   //communications with arduino basics
   Serial.begin(9600); 
-  
+  delay(3000);
+  Serial.print('U');
   //canvas stuff
   //beginCanvas();
   background(0,0,0); 
@@ -27,7 +27,7 @@ void setup (){
 void loop() {
   background(0,0,0); //blank the screen black
   //labels
-  text("meter demo", 100, 5);
+  text("meter demo (work in progress disregard any readings!)", 0, 5);
   text(" boost pressure: ", 18, 18);
   text("oil temperature: ", 18, 38);
   text("  temperature 1: ", 18, 58);
@@ -40,15 +40,11 @@ void loop() {
   lcd_puts("accelerometer x: ", 18, 98, mwhite, mblack);*/
   
   while (!(touch_get_cursor(&m_point))){
-    Serial.print('U'); //handshake
-    while (Serial.read() != 'U'){}
     Serial.print('F'); //request for data block
     boost = getAValue();
     oilT = getAValue(); 
     temp1 = getAValue();
     temp2 = getAValue();
-    Serial.print('U'); //handshake
-    while (Serial.read() != 'U'){}
     Serial.print('X'); //request a data block
     accelx = getAValue();
     //display data here
@@ -82,13 +78,14 @@ void loop() {
 }
 
 float getAValue(){
-  float getValue = (Serial.read() << 24) + (Serial.read() << 16) + (Serial.read() << 8) + Serial.read(); 
-  //float getValue = Serial.read();
+  //while(Serial.available()){}
+  int getValue = Serial.read();
   getValue = (getValue << 8) + Serial.read();
-  getValue = (getValue << 16) + Serial.read();
-  getValue = (getValue << 24) + Serial.read();
-  Serial.print('C');
-  return getValue;
+  float getValueF = (float)getValue / 10;
+  //Serial.print('C');
+  delay(20);
+  //while(Serial.read()!='C'){}
+  return getValueF;
 }
 /*
 //code from: http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1207226548/11#11
