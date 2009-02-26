@@ -35,6 +35,7 @@ int y;
 void setup(){
   //setup connection to tsshield
   vSerial.begin(9600);
+  while(vSerial.read() != 'U'){}
   zeroAccelerometer();
 }
 
@@ -57,11 +58,10 @@ void zeroAccelerometer(){
 }
 
 void loop (){
-  //handshake to say clear to send
-  while(vSerial.read() != 'U'){}
   //listen for queries from tsshield
     //full pull
-    if (vSerial.read() == 'F'){  
+  char readS = vSerial.read();
+    if (readS == 'F'){  
       boost = lookup_boost(analogRead(boostPin));
       oilT = lookup_oil_temp(analogRead(tempPin));
       t1 = lookup_temp(analogRead(t1pin));
@@ -72,7 +72,7 @@ void loop (){
       sendFloat(t2);
     }
     //xydisplay
-    if (vSerial.read() == 'X'){
+    if (readS == 'X'){
       x = getAccelerometerData (xval);
       //y = getAccelerometerData (yval);  
       sendFloat(x);
@@ -82,7 +82,12 @@ void loop (){
 }
 
 void sendFloat(float sendVar){
-  unsigned char lowByte, highByte;
+  sendVar = sendVar * 10;
+  int sendV = (int)sendVar;
+  //TODO: change to using ints with * 10
+  
+  
+  /*unsigned char lowByte, highByte;
   unsigned int val;
   //set val to something
   char firstByte = (unsigned char)val;
@@ -95,8 +100,15 @@ void sendFloat(float sendVar){
   delay(1);
   vSerial.print(thirdByte);
   delay(1);
-  vSerial.print(fourthByte);
-  while(vSerial.read() != 'C'){} //check for clear signal before sending next
+  vSerial.print(fourthByte);*/
+  char lowByte = (unsigned char)sendV;
+  char highByte = (unsigned char)(sendV >> 8);
+  vSerial.print(highByte);
+  delay(1);
+  vSerial.print(lowByte);
+  delay(10);
+  //while(vSerial.read() != 'C'){} //check for clear signal before sending next
+  //vSerial.print('C');
   return;
 }
 
