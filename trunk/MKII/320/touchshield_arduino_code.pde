@@ -24,12 +24,12 @@ int t2pin = 3;
 int tempPin = 1;
 int boostPin = 0;
 
-int boost;
-int oilT;
-int t1;
-int t2;
-int x;
-int y;
+float boost;
+float oilT;
+float t1;
+float t2;
+float x;
+float y;
 
   
 void setup(){
@@ -104,7 +104,7 @@ void sendFloat(float sendVar){
   char lowByte = (unsigned char)sendV;
   char highByte = (unsigned char)(sendV >> 8);
   vSerial.print(highByte);
-  delay(1);
+  //delay(1);
   vSerial.print(lowByte);
   delay(10);
   //while(vSerial.read() != 'C'){} //check for clear signal before sending next
@@ -117,28 +117,29 @@ float lookup_boost(int boost){
   //boost = ( (boost-106000) / 259000 );
   // boost = ( (( boost * 398) / 1000) + 2); //2 is the y intercept
   //398 changed to 378 for slope...because slope was too steep
-  boost = ( (( boost * 378) / 1000) - 4)/10; //get rid of the divide by ten when adding decimals on display
-  return boost;
+  float fboost = ( (( (float)boost * 378.0) / 1000.0) - 4.0)/10.0; //get rid of the divide by ten when adding decimals on display
+  return fboost;
 }
 
 //code for defi/nippon-seiki temp sender  
 float lookup_oil_temp(int tval){
+  float ftval = (float)tval;
   if (tval <= 200){
     return 0.0;
   }
   
   if (tval > 200 && tval <= 315){
-    return .37 * tval + 47.74;
+    return .37 * ftval + 47.74;
     //return (37 * tval + 4774);
   }
   
   if (tval > 315 && tval <= 477){
-    return .28 * tval + 71.3;
+    return .28 * ftval + 71.3;
     //return (28 * tval + 7130);
   }
   
   if (tval > 477 && tval <= 790){
-    return .33 * tval + 35.59;
+    return .33 * ftval + 35.59;
     //return (33 * tval + 3559);
   }
   
@@ -151,6 +152,7 @@ float lookup_oil_temp(int tval){
 
 //correctly converted to float values
 float lookup_temp(int tval){
+  float ftval = (float)tval;
   if (tval < 89){
    return (999.9); 
   }
@@ -158,49 +160,49 @@ float lookup_temp(int tval){
     return (0.0);
   }
   if ((tval <= 960)&&(tval > 932)){
-    return (((tval-1015.77))/(-1.72));
+    return (((ftval-1015.77))/(-1.72));
   }
   if ((tval <= 932)&&(tval > 896)){
-    return (((tval-1042.01))/(-2.26));
+    return (((ftval-1042.01))/(-2.26));
   }
   if ((tval <= 896)&&(tval > 851)){
-    return (((tval-1077.38))/(-2.80));
+    return (((ftval-1077.38))/(-2.80));
   }
   if ((tval <= 851)&&(tval > 791)){
-    return (((tval-1122.64))/(-3.35));
+    return (((ftval-1122.64))/(-3.35));
   }
   if ((tval <= 791)&&(tval > 707)){
-    return (((tval-1175.88))/(-3.88));
+    return (((ftval-1175.88))/(-3.88));
   }
   if ((tval <= 707)&&(tval > 624)){
-    return (((tval-1214.41))/(-4.21));
+    return (((ftval-1214.41))/(-4.21));
   }
   if ((tval <= 624)&&(tval > 532)){
-    return (((tval-1223.67))/(-4.28));
+    return (((ftval-1223.67))/(-4.28));
   }
   if ((tval <= 532)&&(tval > 437)){
-    return (((tval-1186.51))/(-4.05));
+    return (((ftval-1186.51))/(-4.05));
   }
   if ((tval <= 437)&&(tval > 364)){
-    return (((tval-1113.49))/(-3.66));
+    return (((ftval-1113.49))/(-3.66));
   }
   if ((tval <= 364)&&(tval > 306)){
-    return (((tval-1022.32))/(-3.21));
+    return (((ftval-1022.32))/(-3.21));
   }
   if ((tval <= 306)&&(tval > 248)){
-    return (((tval-90.78))/(-2.70));
+    return (((ftval-90.78))/(-2.70));
   }
   if ((tval <= 248)&&(tval > 200)){
-    return (((tval-785.75))/(-2.20));
+    return (((ftval-785.75))/(-2.20));
   }
   if ((tval <= 200)&&(tval > 158)){
-    return (((tval-665.07))/(-1.75));
+    return (((ftval-665.07))/(-1.75));
   }
   if ((tval <= 158)&&(tval > 123)){
-    return (((tval-553.00))/(-1.37));
+    return (((ftval-553.00))/(-1.37));
   }
   if ((tval <= 123)&&(tval > 90)){
-    return (((tval-417.52))/(-.94));
+    return (((ftval-417.52))/(-.94));
   }
 }
 
