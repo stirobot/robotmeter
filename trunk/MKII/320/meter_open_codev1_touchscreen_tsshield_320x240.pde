@@ -1,5 +1,5 @@
 //#include <graph.h> //for two graph
-#include <touchLargeNums.h> //for touch timer
+//#include <touchLargeNums.h> //for touch timer
 //#include <math.h> //needed for cos/sin/etc. //using lookup table now...for performance reasons
 //#define PI 3.14159265
 const float sintable[90] = {
@@ -94,6 +94,20 @@ const float sintable[90] = {
 0.9998,
 1.0000  };
 
+float oil_temp = 120;
+float boost = 0;
+float temp1 = 1;
+float temp2 = 1;
+float accelx = 0, accely = 0;
+float o_x = 160;
+float o_y = 160;
+float x_peak_neg = 0;
+float x_peak_pos = 0;
+float y_peak_neg = 0;
+float y_peak_pos = 0;
+  
+float o_oil_temp = 0;
+float o_boost = 0; 
 
 COLOR gaugeRed = {224, 38, 41};
 COLOR greenLine = {26, 255, 26};
@@ -111,7 +125,7 @@ COLOR fadedYellow = {255, 255, 51};
 
 POINT m_point;
 
-largeNum myFont = largeNum();
+//largeNum myFont = largeNum();
 boolean timermode = 0; //0 = stopped at 0, 1 = running
 int timerStartMillis = 0;
 int timerStoppedMillis = 0;
@@ -161,19 +175,21 @@ void setup (){
 
 void loop() {
   //replace with code to get readings from arduino
-  float oil_temp = 120;
-  float boost = 0;
-  float temp1 = 1;
-  float temp2 = 1;
-  float accelx = 0, accely = 0;
+  oil_temp = random(0, 120);
+  boost = random(0, 20);
+  temp1 = random(0, 300);
+  temp2 = random(0, 300);
+  accelx = random(0, 2); 
+  accely = random(0, 2);
   
-  float o_oil_temp = 0;
-  float o_boost = 0; 
+  o_oil_temp = 0;
+  o_boost = 0; 
+  
   //gauge on left side
   if (gauge == 1){
     oil_temp_gauge(oil_temp, o_oil_temp);
   }
-  else if (gauge == 1){
+  else if (gauge == 2){
     boost_gauge(boost, o_boost);
   }
   else if (gauge == 3){
@@ -195,9 +211,7 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
  //display the oil temp gauge background
  if (gaugedrawswitch == 0){
      lcd_clearScreen(mblack);
-     bmp_draw("oilgaug",0,0);
-     bmp_draw("accelbk",0,227);
-     bmp_draw("brchart",180,0);
+     bmp_draw("oiltbig",0,0);
      gaugedrawswitch = 1;
   }
   while (!(touch_get_cursor(&m_point))){
@@ -297,8 +311,6 @@ void boost_gauge(float boost, float o_boost){
   if (gaugedrawswitch == 0){
    lcd_clearScreen(mblack);
    bmp_draw("bstgaug",0,0);
-   bmp_draw("accelbk",0,227);
-   bmp_draw("brchart",180,0);
    gaugedrawswitch = 1;
   }
   //loop
@@ -423,14 +435,56 @@ void four_bar(float oilT, float boost, float T1, float T2){
   while (touch_get_cursor(&m_point)){ //debounce hold
   LCD_RECT boostRect; boostRect.left = 0; boostRect.right = 128; boostRect.top = 11; boostRect.bottom = 34;
   LCD_RECT oilRect; oilRect.left = 0; oilRect.right = 128; oilRect.top = 36; oilRect.bottom = 59;
-  if (pointInRect(m_point,boostRect)){boost_gauge();}
-  if (pointInRect(m_point,oilRect)){oil_temp_gauge();}
+  if (pointInRect(m_point,boostRect)){boost_gauge(boost, o_boost);}
+  if (pointInRect(m_point,oilRect)){oil_temp_gauge(oil_temp, o_oil_temp);}
   }
   return;
 }
 
-void accelDisplay(float x, float y){
-  return();
+void accelDisplay(float x){
+  //remove the old x an y drawings
+  fill(0,0,0);
+  stroke(0,0,0);
+  rect(o_x, 224, 5, 5);
+  //draw a new rectangle
+  fill(0,0,255);
+  stroke(0,0,255);
+  //scale x position of -1.5 to 1.5 G's to 300 pixels
+  o_x = x;
+  if (x < 0){
+    o_x = 160 + (x * 10);
+  }
+  if (x > 0){
+    o_x = 160 - (x * 10);
+  }
+  else {o_x = 0;}
+  rect(o_x, 224, 5, 5);
+  //draw number of x next to rectangle
+  text(o_x, 218, 5, 5);
+  //if it is greater or less than the peaks then draw an new peak circle
+  if (o_x > x_peak_pos){
+    //clear the old peak circle
+    fill(0,0,0); stroke(0,0,0);
+    ellipse(x_peak_pos, 234, 5, 5);
+    //draw the new one
+    fill(0,0,255); stroke(0,0,255);
+    x_peak_pos = o_x;
+    ellipse(x_peak_pos, 234, 5, 5);
+    //draw the peak number
+    text(x_peak_pos, 240, 5, 5);
+  }
+  if (o_x < x_peak_neg){
+    //clear the old peak circle
+    fill(0,0,0); stroke(0,0,0);
+    ellipse(x_peak_neg, 234, 5, 5);
+    //draw the new one
+    fill(0,0,255); stroke(0,0,255);
+    x_peak_pos = o_x;
+    ellipse(x_peak_neg, 234, 5, 5);
+    //draw the peak number
+    text(x_peak_neg, 240, 5, 5);
+  }
+  return;
 }
 
 //misc functions
