@@ -156,51 +156,49 @@ boolean gaugedrawswitch = 0;
 
 void setup (){
 
-  fadeIn(10, 5);
   bmp_draw("robotsh",0,0);
   delay(2000);
-  fadeOut(10, 5);
   //display the splash screen 
-  delay(100);
-  fadeIn(10, 5);
   bmp_draw("stisplsh", 0, 0);
-  
+  delay(2000);
   //Serial.begin(9600); //set up the TouchShield serial connection
   //delay(3000); //and wait a little for the Arduino to boot up
 
   //Serial.print('U'); //send a sync character to the Arduino
-  fadeOut(10, 5);
-  fadeIn(10,5);
 }
 
 void loop() {
-  //replace with code to get readings from arduino
-  oil_temp = random(0, 120);
-  boost = random(0, 20);
-  temp1 = random(0, 300);
-  temp2 = random(0, 300);
-  accelx = random(0, 2); 
-  accely = random(0, 2);
+  while (!(touch_get_cursor(&m_point))){
+    //replace with code to get readings from arduino
+    oil_temp++;// = random(0, 120);
+    boost++;// = random(0, 20);
+    temp1++;// = random(0, 300);
+    temp2++;// = random(0, 300);
+    accelx++;// = random(0, 2); 
+    accely++;// = random(0, 2);
   
-  o_oil_temp = 0;
-  o_boost = 0; 
+    o_oil_temp = 0;
+    o_boost = 0; 
   
-  //gauge on left side
-  if (gauge == 1){
-    oil_temp_gauge(oil_temp, o_oil_temp);
+    //gauge on left side
+    if (gauge == 1){
+      oil_temp_gauge(oil_temp, o_oil_temp);
+    }
+    else if (gauge == 2){
+      boost_gauge(boost, o_boost);
+    }
+    else if (gauge == 3){
+      temp_gauge(temp1, temp2);
+    }
+  
+    //update the bar graphs
+    four_bar(oil_temp, boost, temp1, temp2);
+  
+    //update the accelerometer display
+    accelDisplay(accelx);
+    
   }
-  else if (gauge == 2){
-    boost_gauge(boost, o_boost);
-  }
-  else if (gauge == 3){
-    temp_gauge(temp1, temp2);
-  }
-  
-  //update the bar graphs
-  four_bar(oil_temp, boost, temp1, temp2);
-  
-  //update the accelerometer display
-  accelDisplay(accelx, accely);
+  while (touch_get_cursor(&m_point)){ } //debounce
   
 }
 
@@ -210,29 +208,18 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
 
  //display the oil temp gauge background
  if (gaugedrawswitch == 0){
-     lcd_clearScreen(mblack);
+     background(0,0,0);
      bmp_draw("oiltbig",0,0);
      gaugedrawswitch = 1;
   }
   while (!(touch_get_cursor(&m_point))){
    //if warmed and not previously warmed then flash message
    if ( (oil_temp_startup == false) && (oil_temp >= oil_temp_warn) ){
-      oil_temp_startup = true;
-      lcd_clearScreen(mblack);
-      //*TODO: change this to use largenumbs*
-      lcd_puts("Engine Warmed!",10,30,gaugeRed,mblack); 
-            lcd_puts("Engine Warmed!",20,40,gaugeRed,mblack); 
-                  lcd_puts("Engine Warmed!",30,50,gaugeRed,mblack); 
-                        lcd_puts("Engine Warmed!",40,60,gaugeRed,mblack); 
-      delay (2000);
-      lcd_clearScreen(mblack);
-      bmp_draw("oilgaug",0,0);
+       //add new engine warmed code here!
    }
    //if the warn point is met flash the circle encompassing the gauge
    if (int(oil_temp) >= warnOilT){
-    lcd_circle(142,20,9, gaugeRed, gaugeRed);
-    delay(90);
-    lcd_circle(142,20,9, gaugeRed, mblack);  
+      warn_flash();
    }
    //draw a line to rep this
    //line is 40 pixels long ... this is always the hypotenuse
@@ -286,9 +273,10 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
    //print deg F
    //do conversion from int to string with decimal places
    //*TODO: move and and use largenumbs*
-   char char_oil_temp[7];
+   /*char char_oil_temp[7];
    fmtDouble(oil_temp, 2, char_oil_temp, 7);
-   lcd_puts(char_oil_temp, 80, 72, gaugeRed, mblack);
+   lcd_puts(char_oil_temp, 80, 72, gaugeRed, mblack);*/
+   text(oil_temp, 80, 72);
    //delay(500); //for testing
    //bmp_draw("oilgaug",0,0);
    return;
@@ -309,7 +297,7 @@ void boost_gauge(float boost, float o_boost){
   float tangle;
   //display the boost gauge background
   if (gaugedrawswitch == 0){
-   lcd_clearScreen(mblack);
+   background(0, 0, 0);
    bmp_draw("bstgaug",0,0);
    gaugedrawswitch = 1;
   }
@@ -318,9 +306,7 @@ void boost_gauge(float boost, float o_boost){
      //get boost reading
      boost++; //for testing
      if (int(boost) >= warnBoost){
-      lcd_circle(11,10,9, gaugeRed, gaugeRed);
-      delay(90);
-      lcd_circle(11,10,9, gaugeRed, mblack);  
+       warn_flash(); 
      }
      //draw a line to rep this
      //line is 40 pixels long ... this is always the hypotenuse
@@ -362,9 +348,11 @@ void boost_gauge(float boost, float o_boost){
    o_endy = endy;
      //print deg F
      //do conversion from int to string with decimal places
-     char char_boost[7];
+     /*char char_boost[7];
      fmtDouble(boost, 2, char_boost, 7);
-     lcd_puts(char_boost, 65, 82, gaugeRed, mblack);
+     lcd_puts(char_boost, 65, 82, gaugeRed, mblack);*/
+     stroke(224, 38, 41); fill(0,0,0);
+     text(boost, 65, 82);
      //delay(200);
      //bmp_draw("bstgaug",0,0); //is this the right way to do a redraw??
   }
@@ -416,14 +404,19 @@ void four_bar(float oilT, float boost, float T1, float T2){
       lcd_rectangle((219+(T2 * 86/maxT2)),136,305,156,mblack,mblack);
     //print values on top of bars in white
     char out[7];
-    fmtDouble(boost, 2, out, 7);
+    fill(0, 0, 0); stroke(204, 204, 255);
+    /*fmtDouble(boost, 2, out, 7);
     lcd_puts(out, 95, 18, lightBlue, mblack);
     fmtDouble(oilT, 2, out, 7);
     lcd_puts(out, 95, 43, lightBlue, mblack);
     fmtDouble(T1, 2, out, 7);
     lcd_puts(out, 95, 69, lightBlue, mblack);     
     fmtDouble(T2, 2, out, 7);
-    lcd_puts(out, 95, 93, lightBlue, mblack);
+    lcd_puts(out, 95, 93, lightBlue, mblack);*/
+    text(boost, 95, 18);
+    text(oilT, 95, 43);
+    text(T1, 95, 69);
+    text(T2, 95, 93);
     
     delay (100);
     //bmp_draw("fourbar",0,0);
@@ -432,11 +425,13 @@ void four_bar(float oilT, float boost, float T1, float T2){
   //when a touch is detected get coords
   //go to mode of what is touched if it is boost or oilT
   //otherwise go to next display
-  while (touch_get_cursor(&m_point)){ //debounce hold
-  LCD_RECT boostRect; boostRect.left = 0; boostRect.right = 128; boostRect.top = 11; boostRect.bottom = 34;
-  LCD_RECT oilRect; oilRect.left = 0; oilRect.right = 128; oilRect.top = 36; oilRect.bottom = 59;
-  if (pointInRect(m_point,boostRect)){boost_gauge(boost, o_boost);}
-  if (pointInRect(m_point,oilRect)){oil_temp_gauge(oil_temp, o_oil_temp);}
+  while (gettouch()){ //debounce hold
+    if ((mouseX < 320) && (mouseX > 182) && (mouseY < 58) && (mouseY > 17)) {
+      boost_gauge(boost, o_boost);
+    }
+    if ((mouseX < 320) && (mouseX > 182) && (mouseY < 93) && (mouseY > 60)){
+      oil_temp_gauge(oil_temp, o_oil_temp);
+    }
   }
   return;
 }
@@ -460,7 +455,7 @@ void accelDisplay(float x){
   else {o_x = 0;}
   rect(o_x, 224, 5, 5);
   //draw number of x next to rectangle
-  text(o_x, 218, 5, 5);
+  text(o_x, x, 218);
   //if it is greater or less than the peaks then draw an new peak circle
   if (o_x > x_peak_pos){
     //clear the old peak circle
@@ -471,7 +466,7 @@ void accelDisplay(float x){
     x_peak_pos = o_x;
     ellipse(x_peak_pos, 234, 5, 5);
     //draw the peak number
-    text(x_peak_pos, 240, 5, 5);
+    text(x_peak_pos, o_x, 240);
   }
   if (o_x < x_peak_neg){
     //clear the old peak circle
@@ -482,43 +477,11 @@ void accelDisplay(float x){
     x_peak_pos = o_x;
     ellipse(x_peak_neg, 234, 5, 5);
     //draw the peak number
-    text(x_peak_neg, 240, 5, 5);
+    text(x_peak_neg, o_x, 240);
   }
   return;
 }
 
-//misc functions
-
-void fadeIn(int fader, int brightness) {
-
-  SETBIT(PORTE, PE3);
-
- 
-
-  for (int i = 0; i<(brightness+1); i++) {
-
-    lcd_setBrightness(i);
-
-    delay(fader);
-
-  }
-}
-
-void fadeOut (int fader, int brightness) {
-
-  for (int i = brightness; i>0; i--) {
-
-    lcd_setBrightness(i);
-
-    delay(fader);
-
-  }
-
- 
-
-  CLRBIT(PORTE, PE3);
-
-}
 
 //code from: http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1207226548/11#11
 //*************
@@ -638,4 +601,13 @@ float lsin(int angle){
 
 float lcos(int angle){
   return (sintable[90-angle]);
+}
+
+void warn_flash(){
+    fill(224, 38, 41); stroke(224, 38, 41); 
+    ellipse(142,20,9,9);
+    delay(90);
+    fill(0,0,0);
+    ellipse(142,20,9,9);  
+    return;
 }
