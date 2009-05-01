@@ -170,17 +170,21 @@ void setup (){
 void loop() {
   while (!(touch_get_cursor(&m_point))){
     //replace with code to get readings from arduino
-    oil_temp++;// = random(0, 120);
-    boost++;// = random(0, 20);
-    temp1++;// = random(0, 300);
-    temp2++;// = random(0, 300);
-    accelx++;// = random(0, 2); 
-    accely++;// = random(0, 2);
+    oil_temp++;
+    if (oil_temp > 300) {oil_temp=120;}
+    boost++;
+    if (boost > 22){boost=0;}
+    temp1++; 
+    if (temp1 > 200){temp1 = 0;}
+    temp2++;
+    if (temp2 > 200){temp2 = 0;}
+    accelx = random(0, 2); 
+    accely = random(0, 2);
   
     o_oil_temp = 0;
     o_boost = 0; 
   
-    //gauge on left side
+    //gauge on upper left side
     if (gauge == 1){
       oil_temp_gauge(oil_temp, o_oil_temp);
     }
@@ -198,8 +202,28 @@ void loop() {
     accelDisplay(accelx);
     
   }
-  while (touch_get_cursor(&m_point)){ } //debounce
-  
+  //when a touch is detected get coords
+  //go to mode of what is touched if it is boost or oilT
+  //otherwise go to next display
+  while (gettouch()){ //debounce hold
+    //boost bar and word area
+    if ((mouseX < 320) && (mouseX > 182) && (mouseY < 58) && (mouseY > 17)) {
+       gauge = 2; 
+       gaugedrawswitch = 0;
+    }
+    //oil temp area
+    if ((mouseX < 320) && (mouseX > 182) && (mouseY < 93) && (mouseY > 60)){
+      gauge = 1;
+      gaugedrawswitch = 0;
+    }
+    //temp area
+    //gauge face area
+    if ((mouseX < 150) && (mouseX > 6) && (mouseY < 150) && (mouseY > 6)) {
+      gauge++;
+      gaugedrawswitch = 0;
+    }
+    //accelerometer area
+  }
 }
 
 void oil_temp_gauge(float oil_temp, float o_oil_temp){
@@ -209,10 +233,10 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
  //display the oil temp gauge background
  if (gaugedrawswitch == 0){
      background(0,0,0);
+     bmp_draw("bground",0,0);
      bmp_draw("oiltbig",0,0);
      gaugedrawswitch = 1;
   }
-  while (!(touch_get_cursor(&m_point))){
    //if warmed and not previously warmed then flash message
    if ( (oil_temp_startup == false) && (oil_temp >= oil_temp_warn) ){
        //add new engine warmed code here!
@@ -280,10 +304,6 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
    //delay(500); //for testing
    //bmp_draw("oilgaug",0,0);
    return;
-  }
-  while (touch_get_cursor(&m_point)){ } //debounce
-  gauge++;
-  return;
 }
 
 //*TODO fill out temp_gauge based on oil_temp, but draw 2 needles
@@ -298,13 +318,10 @@ void boost_gauge(float boost, float o_boost){
   //display the boost gauge background
   if (gaugedrawswitch == 0){
    background(0, 0, 0);
+   bmp_draw("bground",0,0);
    bmp_draw("bstgaug",0,0);
    gaugedrawswitch = 1;
   }
-  //loop
-  while (!(touch_get_cursor(&m_point))){
-     //get boost reading
-     boost++; //for testing
      if (int(boost) >= warnBoost){
        warn_flash(); 
      }
@@ -355,16 +372,11 @@ void boost_gauge(float boost, float o_boost){
      text(boost, 65, 82);
      //delay(200);
      //bmp_draw("bstgaug",0,0); //is this the right way to do a redraw??
-  }
-  while (touch_get_cursor(&m_point)){}
-  //go to the next display if a touch is detected
-  gauge++;
   return;
 }
 
 //*TODO: move bars and modify code to click on bar to change round gauge
 void four_bar(float oilT, float boost, float T1, float T2){
-  while (!(touch_get_cursor(&m_point))){
     //get Boost, OilT, T1, and T2
     boost++;
     oilT++;
@@ -403,7 +415,7 @@ void four_bar(float oilT, float boost, float T1, float T2){
       lcd_rectangle(219,136,(219+(T2 * 86/maxT2)),156,conditionColor,conditionColor);
       lcd_rectangle((219+(T2 * 86/maxT2)),136,305,156,mblack,mblack);
     //print values on top of bars in white
-    char out[7];
+    //char out[7];
     fill(0, 0, 0); stroke(204, 204, 255);
     /*fmtDouble(boost, 2, out, 7);
     lcd_puts(out, 95, 18, lightBlue, mblack);
@@ -420,19 +432,6 @@ void four_bar(float oilT, float boost, float T1, float T2){
     
     delay (100);
     //bmp_draw("fourbar",0,0);
-  }
-  
-  //when a touch is detected get coords
-  //go to mode of what is touched if it is boost or oilT
-  //otherwise go to next display
-  while (gettouch()){ //debounce hold
-    if ((mouseX < 320) && (mouseX > 182) && (mouseY < 58) && (mouseY > 17)) {
-      boost_gauge(boost, o_boost);
-    }
-    if ((mouseX < 320) && (mouseX > 182) && (mouseY < 93) && (mouseY > 60)){
-      oil_temp_gauge(oil_temp, o_oil_temp);
-    }
-  }
   return;
 }
 
