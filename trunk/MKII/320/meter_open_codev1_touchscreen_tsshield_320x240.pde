@@ -152,19 +152,21 @@ int severeT1 = 300;
 int severeT2 = 300;
 
 int gauge = 1; //gauge mode
-boolean gaugedrawswitch = 0;
+int gaugedrawswitch = 0;
 
 void setup (){
 
-  bmp_draw("robotsh",0,0);
+  //bmp_draw("robotsh",0,0);
+  //image(loadImage("bground.bmp"),0,0);
   delay(2000);
   //display the splash screen 
-  bmp_draw("stisplsh", 0, 0);
+  //bmp_draw("stisplsh", 0, 0);
   delay(2000);
   //Serial.begin(9600); //set up the TouchShield serial connection
   //delay(3000); //and wait a little for the Arduino to boot up
 
   //Serial.print('U'); //send a sync character to the Arduino
+ 
 }
 
 void loop() {
@@ -176,6 +178,7 @@ void loop() {
     if (boost > 22){boost=0;}
     temp1++; 
     if (temp1 > 200){temp1 = 0;}
+    temp2++;
     temp2++;
     if (temp2 > 200){temp2 = 0;}
     accelx = random(0, 2); 
@@ -233,8 +236,9 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
  //display the oil temp gauge background
  if (gaugedrawswitch == 0){
      background(0,0,0);
-     bmp_draw("bground",0,0);
-     bmp_draw("oiltbig",0,0);
+     //image(loadImage("bground"),0,0);
+     delay(100);
+     //image(loadImage("oilback"),0,0);
      gaugedrawswitch = 1;
   }
    //if warmed and not previously warmed then flash message
@@ -318,8 +322,8 @@ void boost_gauge(float boost, float o_boost){
   //display the boost gauge background
   if (gaugedrawswitch == 0){
    background(0, 0, 0);
-   bmp_draw("bground",0,0);
-   bmp_draw("bstgaug",0,0);
+   //image(loadImage("bground"),0,0);
+   //image(loadImage("bstback"),0,0);
    gaugedrawswitch = 1;
   }
      if (int(boost) >= warnBoost){
@@ -391,29 +395,33 @@ void four_bar(float oilT, float boost, float T1, float T2){
     //only 86 ticks on a bar
       //lcd_clear (x, y, x1, y2, fill); //draws a solid rect fill with no border
       //bst rect = (old 128)(39, 13) to (125, 33) (320x240)[(219,27),(305,47)]
-      if (boost >= severeBoost){conditionColor = fadedRed;}
-      else if (boost >= warnBoost){conditionColor = fadedYellow;}
-      else {conditionColor = fadedGreen;}
-      lcd_rectangle(219,27,(int(219+(boost * 86.0/maxBoost))),47,conditionColor,conditionColor);
-      lcd_rectangle(int((219+(boost * 86.0/(float)maxBoost))),27,305,47,mblack,mblack); //blacken the rest 
+      if (boost >= severeBoost){fill(255, 102, 102); stroke(255,102,102);}
+      else if (boost >= warnBoost){fill(255, 255, 51); stroke(255, 255, 51);}
+      else {fill(153, 225, 153); stroke(153, 225, 153);}
+      rect(219,27,(int(219+(boost * 86.0/maxBoost))),47);
+      fill(0,0,0); stroke(0,0,0);
+      rect(int((219+(boost * 86.0/(float)maxBoost))),27,305,47); //blacken the rest 
       //oilt rect = (old 128)(39, 38) to (125, 58)  (320x240)[(219,63),(305,83)]
-      if (oilT >= severeOilT){conditionColor = fadedRed;}
-      else if (oilT >= warnOilT){conditionColor = fadedYellow;}
-      else {conditionColor = fadedGreen;}
-      lcd_rectangle(219,63,(219+(oilT * 86/maxOilT)),83,conditionColor,conditionColor);
-      lcd_rectangle((219+(oilT * 86/maxOilT)),63,305,83,mblack,mblack);
+      if (oilT >= severeOilT){fill(255, 102, 102); stroke(255,102,102);}
+      else if (oilT >= warnOilT){fill(255, 255, 51); stroke(255, 255, 51);}
+      else {fill(153, 225, 153); stroke(153, 225, 153);}
+      rect(219,63,(219+(oilT * 86/maxOilT)),83);
+      fill(0,0,0); stroke(0,0,0);
+      rect((219+(oilT * 86/maxOilT)),63,305,83);
       //t1 rect = (old 128) (39, 64) to (125, 84)  (320x240)[(219,99),(305,119)]
-      if (T1 >= severeT1){conditionColor = fadedRed;}
-      else if (T1 >= warnT1){conditionColor = fadedYellow;}
-      else {conditionColor = fadedGreen;}
-      lcd_rectangle(219,99,(219+(T1 * 86/maxT1)),119,conditionColor,conditionColor);
-      lcd_rectangle((219+(T1 * 86/maxT1)),99,125,119,mblack,mblack);      
+      if (T1 >= severeT1){fill(255, 102, 102); stroke(255,102,102);}
+      else if (T1 >= warnT1){fill(255, 255, 51); stroke(255, 255, 51);}
+      else {fill(153, 225, 153); stroke(153, 225, 153);}
+      rect(219,99,(219+(T1 * 86/maxT1)),119);
+      fill(0,0,0); stroke(0,0,0);
+      rect((219+(T1 * 86/maxT1)),99,125,119);      
       //T2 rect = (old 128)(39, 90) to (125, 110) (320x240)[(219,136),(305,156)]
-      if (T2 >= severeT2){conditionColor = fadedRed;}
-      else if (T2 >= warnT2){conditionColor = fadedYellow;}
-      else {conditionColor = fadedGreen;}
-      lcd_rectangle(219,136,(219+(T2 * 86/maxT2)),156,conditionColor,conditionColor);
-      lcd_rectangle((219+(T2 * 86/maxT2)),136,305,156,mblack,mblack);
+      if (T2 >= severeT2){fill(255, 102, 102); stroke(255,102,102);}
+      else if (T2 >= warnT2){fill(255, 255, 51); stroke(255, 255, 51);}
+      else {fill(153, 225, 153); stroke(153, 225, 153);}
+      rect(219,136,(219+(T2 * 86/maxT2)),156);
+      fill(0,0,0); stroke(0,0,0);
+      rect((219+(T2 * 86/maxT2)),136,305,156);
     //print values on top of bars in white
     //char out[7];
     fill(0, 0, 0); stroke(204, 204, 255);
@@ -425,10 +433,10 @@ void four_bar(float oilT, float boost, float T1, float T2){
     lcd_puts(out, 95, 69, lightBlue, mblack);     
     fmtDouble(T2, 2, out, 7);
     lcd_puts(out, 95, 93, lightBlue, mblack);*/
-    text(boost, 95, 18);
-    text(oilT, 95, 43);
-    text(T1, 95, 69);
-    text(T2, 95, 93);
+    text(boost, 224, 32);
+    text(oilT, 224, 68);
+    text(T1, 224, 104);
+    text(T2, 224, 142);
     
     delay (100);
     //bmp_draw("fourbar",0,0);
