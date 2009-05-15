@@ -101,6 +101,7 @@ float x_peak_neg = 0;
 float x_peak_pos = 0;
 float y_peak_neg = 0;
 float y_peak_pos = 0;
+float o_endy, o_endx;
 
 float o_oil_temp = 0;
 float o_boost = 0; 
@@ -164,7 +165,7 @@ int gaugedrawswitch = 0;
 void setup (){
 
   //bmp_draw("robotsh",0,0);
-  image(loadImage("rground.bmp"),0,0);
+  //image(loadImage("rground.bmp"),0,0);
   delay(2000);
   //display the splash screen 
   //bmp_draw("stisplsh", 0, 0);
@@ -244,14 +245,14 @@ void loop() {
 }
 
 void oil_temp_gauge(float oil_temp, float o_oil_temp){
-  float endy, endx, o_endx, o_endy;
+  float endy, endx;
   float tangle;
 
   //display the oil temp gauge background
   if (gaugedrawswitch == 0){
     background(0,0,0);
-    image(loadImage("rground.bmp"),0,0);
-    delay(100);
+    //image(loadImage("rground.bmp"),0,0);
+    //delay(100);
     image(loadImage("oilback.bmp"),0,0);
     gaugedrawswitch = 1;
   }
@@ -306,7 +307,9 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
   o_endx = endx;
   o_endy = endy;
 
-  text(oil_temp, 80, 72);
+  stroke(224, 38, 41); 
+  fill(0,0,0);
+  text(oil_temp, 90, 115);
   return;
 }
 
@@ -317,12 +320,12 @@ void temp_gauge(float temp1, float temp2){
 }
 
 void boost_gauge(float boost, float o_boost){
-  float endy, endx, o_endy, o_endx;
+  float endy, endx;
   float tangle;
   //display the boost gauge background
   if (gaugedrawswitch == 0){
     background(0, 0, 0);
-    image(loadImage("rground.bmp"),0,0);
+    //image(loadImage("rground.bmp"),0,0);
     image(loadImage("bstback.bmp"),0,0);
     gaugedrawswitch = 1;
   }
@@ -374,7 +377,7 @@ void boost_gauge(float boost, float o_boost){
    lcd_puts(char_boost, 65, 82, gaugeRed, mblack);*/
   stroke(224, 38, 41); 
   fill(0,0,0);
-  text(boost, 65, 82);
+  text(boost, 90, 115);
   //delay(200);
   //bmp_draw("bstgaug",0,0); //is this the right way to do a redraw??
   return;
@@ -399,7 +402,7 @@ void four_bar(float oilT, float boost, float T1, float T2){
   }
   rect(219,27,(boost * 86.0/maxBoost),20);
   fill(0,0,0); 
-  stroke(0,0,0);
+  //stroke(0,0,0);
   rect(int((219+(boost * 86.0/maxBoost))),27,(86 - boost * 86.0/maxBoost),20); //blacken the rest 
   //oilt rect = (old 128)(39, 38) to (125, 58)  (320x240)[(219,63),(305,83)]
   if (oilT >= severeOilT){
@@ -416,7 +419,7 @@ void four_bar(float oilT, float boost, float T1, float T2){
   }
   rect(219,63,(oilT * 86/maxOilT),20);
   fill(0,0,0); 
-  stroke(0,0,0);
+  //stroke(0,0,0);
   rect((219+(oilT * 86/maxOilT)),63,(86 - oilT * 86/maxOilT),20); 
   //t1 rect = (old 128) (39, 64) to (125, 84)  (320x240)[(219,99),(305,119)]
   if (T1 >= severeT1){
@@ -433,7 +436,7 @@ void four_bar(float oilT, float boost, float T1, float T2){
   }
   rect(219,99,(T1 * 86/maxT1),20);
   fill(0,0,0); 
-  stroke(0,0,0);
+  //stroke(0,0,0);
   rect((219+(T1 * 86/maxT1)),99,(86 - T1 * 86/maxT1),20);    
   //T2 rect = (old 128)(39, 90) to (125, 110) (320x240)[(219,136),(305,156)]
   if (T2 >= severeT2){
@@ -450,7 +453,7 @@ void four_bar(float oilT, float boost, float T1, float T2){
   }
   rect(219,136,(T2 * 86/maxT2),20);
   fill(0,0,0); 
-  stroke(0,0,0);
+  //stroke(0,0,0);
   rect((219+(T2 * 86/maxT2)),136,(86 - T2 * 86/maxT2),20); 
   //print values on top of bars in white
   fill(0, 0, 0); 
