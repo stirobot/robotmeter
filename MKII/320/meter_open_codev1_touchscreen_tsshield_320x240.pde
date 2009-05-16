@@ -166,7 +166,7 @@ void setup (){
 
   //bmp_draw("robotsh",0,0);
   //image(loadImage("rground.bmp"),0,0);
-  delay(2000);
+  //delay(100);
   //display the splash screen 
   //bmp_draw("stisplsh", 0, 0);
   //Serial.begin(9600); //set up the TouchShield serial connection
@@ -181,7 +181,7 @@ void loop() {
     //replace with code to get readings from arduino
     oil_temp++;
     if (oil_temp > maxOilT) {
-      oil_temp=120;
+      oil_temp=100;
     }
     boost++;
     if (boost > maxBoost){
@@ -196,8 +196,9 @@ void loop() {
     if (temp2 > maxT2){
       temp2 = 0;
     }
-    accelx = random(0, 2); 
-    accely = random(0, 2);
+    
+    accelx = (float)random(-15, 15)/10.0; 
+    accely = (float)random(-15, 15)/10.0;
 
     o_oil_temp = 0;
     o_boost = 0; 
@@ -269,26 +270,34 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
   //angle formula is ...
   if (oil_temp <= 120){ //ok
     endx = 87;
-    endy = 94;
+    endy = 94 + 30;
   }
   else if ((oil_temp > 120) && (oil_temp < 180)){ //not ok
     tangle = 1.5 * (oil_temp - 120); //1.5 is 90degrees/60degF or the scaling factor
     endx = 87 - (30.0 * lsin(tangle)); 
     endy = 94 + (30.0 * lcos(tangle));
   }
-  else if ((oil_temp >= 180) && (oil_temp < 240)){ //ok
+  else if (oil_temp == 180){ //necessary because trig does weird things at the 90deg's
+    endx = 87 - 30;
+    endy = 94;
+  }
+  else if ((oil_temp > 180) && (oil_temp < 240)){ //ok
     tangle = 1.5 * (oil_temp - 180);
     endx = 87 - (30 * lcos(tangle));
     endy = 94 - (30 * lsin(tangle));
   }
-  else if ((oil_temp >= 240) && (oil_temp < 300)){ //not ok
+  else if (oil_temp == 240){
+    endx = 87;
+    endy = 94 - 30;
+  }
+  else if ((oil_temp > 240) && (oil_temp < 300)){ //not ok
     tangle = 90 - 1.5 * (oil_temp - 240); //inverse...because we are actually looking for the angle down from 90 deg up
     endx = 87 + (30 * lcos(tangle));
     endy = 94 - (30 * lsin(tangle));
   }
   else if (oil_temp > 300){//ok
-    endx = 94;
-    endy = 87;
+    endx = 87 + 30;
+    endy = 94;
   }
   if (abs(o_oil_temp - oil_temp) > 2){
     stroke(224, 38, 41);
@@ -337,20 +346,24 @@ void boost_gauge(float boost, float o_boost){
   //angle formula is ...
   if (boost <= 0){//ok
     endx = 24;
-    endy = 93;
+    endy = 94;
   }
   else if ((boost > 0) && (boost < 10)){
     tangle = 9 * (boost); // 90/10 is 9  
     endx = 87 - (40 * lcos(tangle));
     endy = 93 - (40 * lsin(tangle));
   }
-  else if ((boost >= 10) && (boost < 20)){
+  else if (boost == 10){
+    endx = 87;
+    endy = 94 - 0;
+  }
+  else if ((boost > 10) && (boost < 20)){
     tangle = 9 * (boost - 10); 
     endx = 87 + (40 * lsin(tangle));
     endy = 93 - (40 * lcos(tangle));
   }
   else if (boost >= 20){
-    endx = 104;
+    endx = 87 + 40;
     endy = 93;
   }
   if (abs(o_boost - boost) > 2){
@@ -360,12 +373,14 @@ void boost_gauge(float boost, float o_boost){
     line(86, 93, endx, endy);
     line(87, 94, endx, endy);
     line(87, 92, endx, endy);
-    stroke(0,0,0);
-    line(87, 92, o_endx, o_endy);
-    line(87, 94, o_endx, o_endy);
-    line(86, 93, o_endx, o_endy);
-    line(88, 93, o_endx, o_endy);
-    line(87, 93, o_endx, o_endy);
+    if ((endx + endy >= 2) || (endx + endy >= 2)) {
+      stroke(0,0,0);
+      line(87, 92, o_endx, o_endy);
+      line(87, 94, o_endx, o_endy);
+      line(86, 93, o_endx, o_endy);
+      line(88, 93, o_endx, o_endy);
+      line(87, 93, o_endx, o_endy);
+    }
 
   }
   o_endx = endx;
@@ -463,59 +478,35 @@ void four_bar(float oilT, float boost, float T1, float T2){
   text(T1, 224, 104);
   text(T2, 224, 142);
 
-  delay (100);
+  //delay (100);
   //bmp_draw("fourbar",0,0);
   return;
 }
 
 void accelDisplay(float x){
-  //remove the old x an y drawings
-  fill(0,0,0);
-  stroke(0,0,0);
-  rect(o_x, 224, 5, 5);
-  //draw a new rectangle
-  fill(0,0,255);
-  stroke(0,0,255);
   //scale x position of -1.5 to 1.5 G's to 300 pixels
+  //clear the space
+  stroke(0,0,0); fill(0,0,0);
+  rect(0, 205, 320, 35);
+  stroke(0,0,0);
+  fill(0,255,255);
   o_x = x;
   if (x < 0){
     o_x = 160 + (x * 10);
+    rect((160 + o_x), 205, o_x, 35);
   }
   if (x > 0){
     o_x = 160 - (x * 10);
+    rect(160, 205, o_x ,35);
   }
   else {
     o_x = 0;
   }
-  rect(o_x, 224, 5, 5);
-  //draw number of x next to rectangle
-  text(o_x, x, 218);
-  //if it is greater or less than the peaks then draw an new peak circle
   if (o_x > x_peak_pos){
-    //clear the old peak circle
-    fill(0,0,0); 
-    stroke(0,0,0);
-    ellipse(x_peak_pos, 234, 5, 5);
-    //draw the new one
-    fill(0,0,255); 
-    stroke(0,0,255);
-    x_peak_pos = o_x;
-    ellipse(x_peak_pos, 234, 5, 5);
-    //draw the peak number
-    text(x_peak_pos, o_x, 240);
+    //reset the peaks
   }
   if (o_x < x_peak_neg){
-    //clear the old peak circle
-    fill(0,0,0); 
-    stroke(0,0,0);
-    ellipse(x_peak_neg, 234, 5, 5);
-    //draw the new one
-    fill(0,0,255); 
-    stroke(0,0,255);
-    x_peak_pos = o_x;
-    ellipse(x_peak_neg, 234, 5, 5);
-    //draw the peak number
-    text(x_peak_neg, o_x, 240);
+    //reset the peaks
   }
   return;
 }
