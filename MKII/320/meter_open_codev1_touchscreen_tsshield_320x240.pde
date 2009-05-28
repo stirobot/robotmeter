@@ -255,6 +255,7 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
     //image(loadImage("rground.bmp"),0,0);
     //delay(100);
     image(loadImage("oilback.bmp"),0,0);
+    bar_labels();
     gaugedrawswitch = 1;
   }
   //if warmed and not previously warmed then flash message
@@ -316,9 +317,11 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
   o_endx = endx;
   o_endy = endy;
 
-  stroke(224, 38, 41); 
+  /*stroke(224, 38, 41); 
   fill(0,0,0);
-  text(oil_temp, 90, 115);
+  char char_oil_temp[7];
+  fmtDouble(oil_temp, 2, char_oil_temp, 7);
+  text(char_oil_temp, 90, 115, 10);*/
   return;
 }
 
@@ -336,6 +339,7 @@ void boost_gauge(float boost, float o_boost){
     background(0, 0, 0);
     //image(loadImage("rground.bmp"),0,0);
     image(loadImage("bstback.bmp"),0,0);
+    bar_labels();
     gaugedrawswitch = 1;
   }
   if (int(boost) >= warnBoost){
@@ -472,11 +476,16 @@ void four_bar(float oilT, float boost, float T1, float T2){
   rect((219+(T2 * 86/maxT2)),136,(86 - T2 * 86/maxT2),20); 
   //print values on top of bars in white
   fill(0, 0, 0); 
-  stroke(204, 204, 255);
-  text(boost, 224, 32);
-  text(oilT, 224, 68);
-  text(T1, 224, 104);
-  text(T2, 224, 142);
+  stroke(49, 79, 79);
+  char thechar[7];
+  fmtDouble(boost, 2, thechar, 7);
+  text(thechar, 227, 36, 10);
+  fmtDouble(oilT, 2, thechar, 7);
+  text(thechar, 227, 72, 10);
+  fmtDouble(T1, 2, thechar, 7);
+  text(thechar, 227, 108, 10);
+  fmtDouble(T2, 2, thechar, 7);
+  text(thechar, 227, 146, 10);
 
   //delay (100);
   //bmp_draw("fourbar",0,0);
@@ -640,4 +649,14 @@ void warn_flash(){
   fill(0,0,0);
   ellipse(142,20,9,9);  
   return;
+}
+
+void bar_labels(){
+ fill(0,0,0);
+ stroke(238,233,233); 
+ text("Bst", 180, 36, 12);
+ text("OilT", 180, 72, 10);
+ text("T1", 180, 107, 12);
+ text("T2", 180, 145, 12);
+ return; 
 }
