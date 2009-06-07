@@ -94,7 +94,7 @@ float oil_temp = 120;
 float boost = 0;
 float temp1 = 1;
 float temp2 = 1;
-float accelx = 0, accely = 0;
+float accelx = -1.5, accely = -1.5;
 float o_x = 160;
 float o_y = 160;
 float x_peak_neg = 0;
@@ -179,26 +179,25 @@ void setup (){
 void loop() {
   while (!(touch_get_cursor(&m_point))){
     //replace with code to get readings from arduino
-    oil_temp++;
+    oil_temp=oil_temp + random(2);
     if (oil_temp > maxOilT) {
       oil_temp=100;
     }
-    boost++;
+    boost=boost + random(2);
     if (boost > maxBoost){
       boost=0;
     }
-    temp1++; 
+    temp1 = temp1 + random(3); 
     if (temp1 > maxT1){
       temp1 = 0;
     }
-    temp2++;
-    temp2++;
+    temp2=temp2+random(3);
     if (temp2 > maxT2){
       temp2 = 0;
     }
     
-    accelx = (float)random(-15, 15)/10.0; 
-    accely = (float)random(-15, 15)/10.0;
+    accelx = accelx + .1;
+    //accelx = ((float)random(-15, 15))/10.0;
 
     o_oil_temp = 0;
     o_boost = 0; 
@@ -252,8 +251,6 @@ void oil_temp_gauge(float oil_temp, float o_oil_temp){
   //display the oil temp gauge background
   if (gaugedrawswitch == 0){
     background(0,0,0);
-    //image(loadImage("rground.bmp"),0,0);
-    //delay(100);
     image(loadImage("oilback.bmp"),0,0);
     bar_labels();
     gaugedrawswitch = 1;
@@ -494,29 +491,41 @@ void four_bar(float oilT, float boost, float T1, float T2){
 
 void accelDisplay(float x){
   //scale x position of -1.5 to 1.5 G's to 300 pixels
-  //clear the space
-  stroke(0,0,0); fill(0,0,0);
-  rect(0, 205, 320, 35);
+  /*stroke(0,255,255); fill(0,255,255);
+  char thechar[7];
+  fmtDouble(x, 2, thechar, 7);
+  text(thechar, 155, 210, 12);*/
+  int xplot=x*10*160/15;
   stroke(0,0,0);
+  fill(0,0,0);
+  ellipse(160 + o_x, 230, 6, 6); //erase old
+  stroke(0,255,255);
   fill(0,255,255);
-  o_x = x;
-  if (x < 0){
-    o_x = 160 + (x * 10);
-    rect((160 + o_x), 205, o_x, 35);
-  }
-  if (x > 0){
-    o_x = 160 - (x * 10);
-    rect(160, 205, o_x ,35);
-  }
-  else {
-    o_x = 0;
-  }
+  ellipse((160 + xplot), 230, 6, 6); //draw new
+  o_x = xplot; //set old position
   if (o_x > x_peak_pos){
-    //reset the peaks
+    stroke(0,0,0); fill(0,0,0);
+    rect(160 + x_peak_pos - 35, 193, 45, 11); //erase old text
+    ellipse(160 + x_peak_pos, 210, 2, 5); //erase old
+    stroke(255,255,0); fill(255,255,0);
+    x_peak_pos=o_x;
+    ellipse(160 + x_peak_pos, 210, 2, 5); //draw new
+    char thechar[7];
+    fmtDouble(x, 2, thechar, 7);
+    text(thechar, 160 + x_peak_pos - 30, 200, 10); //draw new text
   }
   if (o_x < x_peak_neg){
-    //reset the peaks
+    stroke(0,0,0); fill(0,0,0);
+    rect(160 + x_peak_neg - 5, 193, 45, 11); //erase old tex   
+    ellipse(160 + x_peak_neg, 210, 2, 5); //erase old
+    stroke(255,255,0); fill(255,255,0);
+    x_peak_neg=o_x;
+    ellipse(160 + x_peak_neg, 210, 2, 5); //draw new
+    char thechar[7];
+    fmtDouble(x, 2, thechar, 7);
+    text(thechar, 160 + x_peak_neg, 200, 10); //draw new text
   }
+  
   return;
 }
 
