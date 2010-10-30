@@ -20,8 +20,9 @@ float y_peak_pos = 0;
 float peak_boost = 0;
 float peak_temp1 = 0;
 float peak_temp2 = 0;
-float o_endy, o_endx;
 float o_boost = 0; 
+float o_temp1 = 0;
+float o_temp2 = 0;
 
 int maxBoost = 25;
 int maxT1 = 300;
@@ -35,15 +36,9 @@ int severeBoost = 23;
 int severeT1 = 300;
 int severeT2 = 300;
 
-int tempX;
-int tempY;
-
 void setup(){
   Sensor.begin(19200);
   background(0); //black background
-  gettouch();
-  tempX = mouseX;
-  tempY = mouseY;
   
   //draw the rectangles and labels
   //-spacing should be 40 pixels tall for each rectangle
@@ -105,12 +100,21 @@ void loop(){
         peak_boost = boost;
       }
     }  
-    boost = boost+1;
+    boost = boost + random(2);
+    accelx = accelx + .01;
+    accely = accely + .01;
+    temp1 = temp1 + random(2);
+    temp2 = temp2 + random(2);
     //draw the bars
     draw_bars();
     //print the values
     print_values();
-  
+    
+    //avoid flicker as much as possible by only redrawing when there is a change
+    //skip the accel readings because they will jump all over the place anyways
+    o_boost = boost;
+    o_temp1 = temp1;
+    o_temp2 = temp2;
 }
 
 void print_values(){
@@ -135,50 +139,81 @@ void print_values(){
 }
 
 void draw_bars(){
-  int twidth=0;
+  float twidth=0;
   //boost
-  fill(0,255,0); //green
-  stroke(0,255,0);
-  if (boost > warnBoost){
-    fill(255,255,0);
-    stroke(255,255,0);
+  if(boost != o_boost){
+    fill(0,255,0); //green
+    stroke(0,255,0);
+    if (boost > warnBoost){
+      fill(255,255,0);
+      stroke(255,255,0);
+    }
+    if (boost > severeBoost){
+      fill(255,0,0);
+      stroke(255,0,0);
+    }
+    twidth=258/maxBoost*boost;
+    rect(51,5,twidth,40);
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,5,258-twidth,40);
   }
-  if (boost > severeBoost){
-    fill(255,0,0);
-    stroke(255,0,0);
-  }
-  twidth=258/maxBoost*boost;
-  rect(51,5,twidth,41);
+  
+  //x and y will be displayed as positive only (absolute value) in the bar graph
+  //they will be light blue and have no warning/severe values
+  //x
+  fill(0,255,255); //light blue
+  stroke(0,255,255);
+  twidth = 258/200*abs(accelx*100);
+  rect(51,53,twidth,40);
   stroke(0,0,0);
   fill(0,0,0);
-  rect(twidth+1+51,5,258-twidth,41);
+  rect(twidth+1+51,53,258-twidth,40);
   
-  //x
-  fill(0,255,0); //green
-  stroke(0,255,0);
   //y
-  fill(0,255,0); //green
-  stroke(0,255,0);
+  fill(0,255,255); //light blue
+  stroke(0,255,255);
+  twidth=258/200*abs(accely*100);
+  rect(51,101,twidth,40);
+  stroke(0,0,0);
+  fill(0,0,0);
+  rect(twidth+1+51,101,258-twidth,40);
+  
   //t1
-  fill(0,255,0); //green
-  stroke(0,255,0);
-  if (temp1 > warnT1){
-    fill(255,255,0);
-    stroke(255,255,0);
+  if (temp1 != o_temp1){
+    fill(0,255,0); //green
+    stroke(0,255,0);
+    if (temp1 > warnT1){
+      fill(255,255,0);
+      stroke(255,255,0);
+    }
+    if (temp1 > severeT1){
+      fill(255,0,0);
+      stroke(255,0,0);
+    }
+    twidth = temp1;
+    rect(51,149,twidth,40);
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,149,258-twidth,40);
   }
-  if (temp1 > severeT1){
-    fill(255,0,0);
-    stroke(255,0,0);
-  }
+  
   //t2 
-  fill(0,255,0); //green
-  stroke(0,255,0);
-      if (temp2 > warnT2){
-    fill(255,255,0);
-    stroke(255,255,0);
-  }
-  if (temp2 > severeT2){
-    fill(255,0,0);
-    stroke(255,0,0);
+  if (temp2 != o_temp2){
+    fill(0,255,0); //green
+    stroke(0,255,0);
+        if (temp2 > warnT2){
+      fill(255,255,0);
+      stroke(255,255,0);
+    }
+    if (temp2 > severeT2){
+      fill(255,0,0);
+      stroke(255,0,0);
+    }
+    twidth = temp2;
+    rect(51,197,twidth,40);
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,197,258-twidth,40);
   }
 }
