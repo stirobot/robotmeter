@@ -46,11 +46,11 @@ void setup(){
   //-all rects are 44 high
   fill(0,0,0);
   stroke(255,0,0);
-  rect(50,4,260,42);
-  rect(50,52,260,42);
-  rect(50,100,260,42);
-  rect(50,148,260,42);
-  rect(50,196,260,42);
+  rect(50,4,220,42);
+  rect(50,52,220,42);
+  rect(50,100,220,42);
+  rect(50,148,220,42);
+  rect(50,196,220,42);
   
   //bar labels
   text("boost",8,22,8);
@@ -63,7 +63,7 @@ void setup(){
 
 //get the readings from the arduino
 void loop(){
-  gettouch(); //update the mouse coordinates
+  //gettouch(); //update the mouse coordinates
   if (!strcmp(Sensor.getName(), "x")) {  
       accelx = Sensor.read(); //get the sensor value 
       if ((accelx > x_peak_pos) && (accelx > 0)){
@@ -115,6 +115,8 @@ void loop(){
     o_boost = boost;
     o_temp1 = temp1;
     o_temp2 = temp2;
+    o_x = abs(accelx);
+    o_y = abs(accely);
 }
 
 void print_values(){
@@ -152,11 +154,13 @@ void draw_bars(){
       fill(255,0,0);
       stroke(255,0,0);
     }
-    twidth=258/maxBoost*boost;
+    twidth=218/maxBoost*boost;
     rect(51,5,twidth,40);
-    stroke(0,0,0);
-    fill(0,0,0);
-    rect(twidth+1+51,5,258-twidth,40);
+    if (o_boost >= boost){
+      stroke(0,0,0);
+      fill(0,0,0);
+      rect(twidth+1+51,5,218-twidth,40);
+    }
   }
   
   //x and y will be displayed as positive only (absolute value) in the bar graph
@@ -164,20 +168,24 @@ void draw_bars(){
   //x
   fill(0,255,255); //light blue
   stroke(0,255,255);
-  twidth = 258/200*abs(accelx*100);
+  twidth = 218/200*abs(accelx*100);
   rect(51,53,twidth,40);
-  stroke(0,0,0);
-  fill(0,0,0);
-  rect(twidth+1+51,53,258-twidth,40);
+  if(o_x >= abs(accelx)){
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,53,218-twidth-1,40);
+  }
   
   //y
   fill(0,255,255); //light blue
   stroke(0,255,255);
-  twidth=258/200*abs(accely*100);
+  twidth=218/200*abs(accely*100);
   rect(51,101,twidth,40);
-  stroke(0,0,0);
-  fill(0,0,0);
-  rect(twidth+1+51,101,258-twidth,40);
+  if (o_y >= abs(accely)){
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,101,218-twidth-1,40);
+  }
   
   //t1
   if (temp1 != o_temp1){
@@ -193,9 +201,11 @@ void draw_bars(){
     }
     twidth = temp1;
     rect(51,149,twidth,40);
-    stroke(0,0,0);
-    fill(0,0,0);
-    rect(twidth+1+51,149,258-twidth,40);
+    if (o_temp1 >= temp1){
+      stroke(0,0,0);
+      fill(0,0,0);
+      rect(twidth+1+51,149,218-twidth,40);
+    }
   }
   
   //t2 
@@ -212,8 +222,10 @@ void draw_bars(){
     }
     twidth = temp2;
     rect(51,197,twidth,40);
-    stroke(0,0,0);
-    fill(0,0,0);
-    rect(twidth+1+51,197,258-twidth,40);
+    if (o_temp2 >= temp2){
+      stroke(0,0,0);
+      fill(0,0,0);
+      rect(twidth+1+51,197,218-twidth,40);
+    }
   }
 }
