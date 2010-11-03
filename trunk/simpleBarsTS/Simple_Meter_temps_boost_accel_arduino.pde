@@ -58,7 +58,6 @@ void loop (){
   Sensor.print("t1", t1);
   Sensor.print("t2", t2);
   Sensor.print("bt", boost);
-  return;
 }
 
 
