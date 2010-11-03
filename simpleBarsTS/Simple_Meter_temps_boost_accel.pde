@@ -8,9 +8,9 @@
 //  Turbo F
 
 float boost = 0;
-float temp1 = 1;
-float temp2 = 1;
-float accelx = -1.5, accely = -1.5;
+float temp1 = 0;
+float temp2 = 0;
+float accelx = 0, accely = 0;
 float o_x = 160;
 float o_y = 160;
 float x_peak_neg = 0;
@@ -64,47 +64,54 @@ void setup(){
 //get the readings from the arduino
 void loop(){
   //gettouch(); //update the mouse coordinates
-  if (!strcmp(Sensor.getName(), "x")) {  
-      accelx = Sensor.read(); //get the sensor value 
-      if ((accelx > x_peak_pos) && (accelx > 0)){
-        x_peak_pos = accelx;
+  //add section to reset peaks on touch per area
+  //change the below section so that it updates in a nicer/more efficient manner
+  if (Sensor.available()){
+    int value;
+    value = Sensor.read();
+    if (strcmp(Sensor.getName(), "x")) {  
+        accelx = value/100; //get the sensor value 
+        if ((accelx > x_peak_pos) && (accelx > 0)){
+          x_peak_pos = accelx;
+        }
+        if ((accelx < x_peak_neg) && (accelx < 0)){
+          x_peak_neg = accelx;
+        }
       }
-      if ((accelx < x_peak_neg) && (accelx < 0)){
-        x_peak_neg = accelx;
+      if (strcmp(Sensor.getName(), "y")) {  
+        accely = value/100; //get the sensor value 
+        if ((accely > y_peak_pos) && (accely > 0)){
+          y_peak_pos = accely;
+        }
+        if ((accely < y_peak_neg) && (accely < 0)){
+          y_peak_neg = accely;
+        }        
       }
-    }
-    if (!strcmp(Sensor.getName(), "y")) {  
-      accely = Sensor.read(); //get the sensor value 
-      if ((accely > y_peak_pos) && (accely > 0)){
-        y_peak_pos = accely;
+      if (strcmp(Sensor.getName(), "t1")) {  
+        temp1 = value; //get the sensor value 
+        if (temp1 > peak_temp1){
+          peak_temp1 = temp1;
+        }
       }
-      if ((accely < y_peak_neg) && (accely < 0)){
-        y_peak_neg = accely;
-      }        
-    }
-    if (!strcmp(Sensor.getName(), "t1")) {  
-      temp1 = Sensor.read(); //get the sensor value 
-      if (temp1 > peak_temp1){
-        peak_temp1 = temp1;
+      if (strcmp(Sensor.getName(), "t2")) {  
+        temp2 = value; //get the sensor value 
+        if (temp2 > peak_temp2){
+          peak_temp2 = temp2;
+        }
       }
-    }
-    if (!strcmp(Sensor.getName(), "t2")) {  
-      temp2 = Sensor.read(); //get the sensor value 
-      if (temp2 > peak_temp2){
-        peak_temp2 = temp2;
-      }
-    }
-    if (!strcmp(Sensor.getName(), "bt")){
-      boost = Sensor.read();
-      if (boost > peak_boost){
-        peak_boost = boost;
-      }
-    }  
-    boost = boost + random(2);
+      if (strcmp(Sensor.getName(), "bt")){
+        boost = value;
+        if (boost > peak_boost){
+          peak_boost = boost;
+        }
+      }  
+  }
+    //for debuging the display without the comms stuff
+    /*boost = boost + random(2);
     accelx = accelx + .01;
     accely = accely + .01;
     temp1 = temp1 + random(2);
-    temp2 = temp2 + random(2);
+    temp2 = temp2 + random(2); */
     //draw the bars
     draw_bars();
     //print the values
