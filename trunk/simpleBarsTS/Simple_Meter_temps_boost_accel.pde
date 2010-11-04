@@ -6,7 +6,7 @@
 //  bst
 //  IC F
 //  Turbo F
-//test
+
 float boost = 0;
 float temp1 = 0;
 float temp2 = 0;
@@ -42,7 +42,7 @@ void setup(){
   
   //draw the rectangles and labels
   //-spacing should be 40 pixels tall for each rectangle
-  //-all rects start at 50 and go 260 pixels to 310
+  //-all rects start at 50 and go 2xx pixels widen
   //-all rects are 44 high
   fill(0,0,0);
   stroke(255,0,0);
@@ -63,8 +63,9 @@ void setup(){
 
 //get the readings from the arduino
 void loop(){
-  //gettouch(); //update the mouse coordinates
+  gettouch(); //update the mouse coordinates
   //add section to reset peaks on touch per area
+
   //change the below section so that it updates in a nicer/more efficient manner
   if (Sensor.available()){
     int value;
@@ -106,7 +107,7 @@ void loop(){
         }
       }  
   }
-    //for debuging the display without the comms stuff
+    //for debuging the display without the comms stuff/without sensors
     /*boost = boost + random(2);
     accelx = accelx + .01;
     accely = accely + .01;
@@ -118,7 +119,7 @@ void loop(){
     print_values();
     
     //avoid flicker as much as possible by only redrawing when there is a change
-    //skip the accel readings because they will jump all over the place anyways
+    //skip the accel readings because they will jump all over the place anyways?
     o_boost = boost;
     o_temp1 = temp1;
     o_temp2 = temp2;
