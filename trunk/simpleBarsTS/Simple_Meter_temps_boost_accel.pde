@@ -78,6 +78,8 @@ void loop(){
         if ((accelx < x_peak_neg) && (accelx < 0)){
           x_peak_neg = accelx;
         }
+        print_values_x();
+        draw_bars_x();
       }
       if (strcmp(Sensor.getName(), "y")) {  
         accely = value/100; //get the sensor value 
@@ -87,24 +89,32 @@ void loop(){
         if ((accely < y_peak_neg) && (accely < 0)){
           y_peak_neg = accely;
         }        
+        print_values_y();
+        draw_bars_y();
       }
       if (strcmp(Sensor.getName(), "t1")) {  
         temp1 = value; //get the sensor value 
         if (temp1 > peak_temp1){
           peak_temp1 = temp1;
         }
+        print_values_t1();
+        draw_bars_t1();
       }
       if (strcmp(Sensor.getName(), "t2")) {  
         temp2 = value; //get the sensor value 
         if (temp2 > peak_temp2){
           peak_temp2 = temp2;
         }
+        print_values_t2();
+        draw_bars_t2();
       }
       if (strcmp(Sensor.getName(), "bt")){
         boost = value;
         if (boost > peak_boost){
           peak_boost = boost;
         }
+        print_values_boost();
+        draw_bars_boost();
       }  
   }
     //for debuging the display without the comms stuff/without sensors
@@ -113,10 +123,6 @@ void loop(){
     accely = accely + .01;
     temp1 = temp1 + random(2);
     temp2 = temp2 + random(2); */
-    //draw the bars
-    draw_bars();
-    //print the values
-    print_values();
     
     //avoid flicker as much as possible by only redrawing when there is a change
     //skip the accel readings because they will jump all over the place anyways?
@@ -127,28 +133,48 @@ void loop(){
     o_y = abs(accely);
 }
 
-void print_values(){
+
+//TODO split this into many functions
+void print_values_boost(){
   fill(0,0,0);
   stroke(0,255,255); //light blue 
   //current
   text(boost,274,4+6);
-  text(accelx,274,52+6);
-  text(accely,274,100+6);
-  text(temp1,274,148+6);
-  text(temp2,274,196+6);
-  
   //peak
   text(peak_boost,274,30);
+ }
+
+ void print_values_x(){
+  fill(0,0,0);
+  stroke(0,255,255); //light blue 
+  text(accelx,274,52+6);
   text(x_peak_pos,274,52+20);
   text(x_peak_neg,274,52+30);
+ }
+
+ void print_values_y(){
+  fill(0,0,0);
+  stroke(0,255,255); //light blue 
+  text(accely,274,100+6);
   text(y_peak_pos,274,100+20);
   text(y_peak_neg,274,100+30);
-  text(peak_temp1,274,148+26);
+ }
+
+ void print_values_t1(){
+  fill(0,0,0);
+  stroke(0,255,255); //light blue 
+  text(temp1,274,148+6);
   text(peak_temp2,274,196+26);
-  
+ }
+
+ void print_values_t2(){
+  fill(0,0,0);
+  stroke(0,255,255); //light blue 
+  text(temp2,274,196+6);
+  text(peak_temp1,274,148+26);  
 }
 
-void draw_bars(){
+void draw_bars_boost(){
   float twidth=0;
   //boost
   if(boost != o_boost){
@@ -170,10 +196,15 @@ void draw_bars(){
       rect(twidth+1+51,5,218-twidth,40);
     }
   }
-  
+ }
+
+
   //x and y will be displayed as positive only (absolute value) in the bar graph
   //they will be light blue and have no warning/severe values
+
+void draw_bars_x(){
   //x
+  float twidth=0;
   fill(0,255,255); //light blue
   stroke(0,255,255);
   twidth = 218/200*abs(accelx*100);
@@ -183,8 +214,11 @@ void draw_bars(){
     fill(0,0,0);
     rect(twidth+1+51,53,218-twidth-1,40);
   }
+}
   
+ void draw_bars_y(){
   //y
+  float twidth=0;
   fill(0,255,255); //light blue
   stroke(0,255,255);
   twidth=218/200*abs(accely*100);
@@ -194,8 +228,11 @@ void draw_bars(){
     fill(0,0,0);
     rect(twidth+1+51,101,218-twidth-1,40);
   }
+ }
   
+void draw_bars_t1(){
   //t1
+  float twidth=0;
   if (temp1 != o_temp1){
     fill(0,255,0); //green
     stroke(0,255,0);
@@ -215,8 +252,11 @@ void draw_bars(){
       rect(twidth+1+51,149,218-twidth,40);
     }
   }
-  
+ }
+
+  void draw_bars_t2(){
   //t2 
+  float twidth=0;
   if (temp2 != o_temp2){
     fill(0,255,0); //green
     stroke(0,255,0);
