@@ -66,7 +66,7 @@ float lookup_boost(int boost){
   //boost = ( (boost-106000) / 259000 );
   // boost = ( (( boost * 398) / 1000) + 2); //2 is the y intercept
   //398 changed to 378 for slope...because slope was too steep
-  float fboost = ( (( (float)boost * 378.0) / 1000.0) - 4.0)/10.0; //get rid of the divide by ten when adding decimals on display
+  float fboost = ( (( (float)boost * 378.0) / 1000.0) - 4.0)/10.0; //divide by 10.0 when adding decimals on the display code
   return fboost;
 }
 
