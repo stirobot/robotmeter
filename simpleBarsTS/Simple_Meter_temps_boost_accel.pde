@@ -7,6 +7,12 @@
 //  IC F
 //  Turbo F
 
+//debug notes:
+//temperature sensors work
+///need to post about strcompare working backwards???
+//boost sensor always shows full high (faulty wiring or faulty sensor)
+//accel doesn't do anything (probably faulty wiring) (but could be wrong algorithm??)
+
 float boost = 0;
 float temp1 = 0;
 float temp2 = 0;
@@ -36,13 +42,16 @@ int severeBoost = 23;
 int severeT1 = 300;
 int severeT2 = 300;
 
+int zerogy = 512;
+int zerogx = 512;
+
 void setup(){
   Sensor.begin(19200);
   background(0); //black background
   
   //draw the rectangles and labels
   //-spacing should be 40 pixels tall for each rectangle
-  //-all rects start at 50 and go 2xx pixels widen
+  //-all rects start at 50 and go 2xx pixels wide
   //-all rects are 44 high
   fill(0,0,0);
   stroke(255,0,0);
@@ -53,6 +62,7 @@ void setup(){
   rect(50,196,220,42);
   
   //bar labels
+  stroke(255,255,255); //white looks good...red is unreable in sunlight
   text("boost",8,22,8);
   text("x",20, 52+20,18);
   text("y",20,100+20,18);
@@ -65,13 +75,32 @@ void setup(){
 void loop(){
   gettouch(); //update the mouse coordinates
   //add section to reset peaks on touch per area
-
+  //tapping the bars to the right of the sensor label resets that peak
+  //tapping the label change modes (TODO)
+  if ( (mouseX < 50) && (mouseY < 46) && (mouseY > 4)){
+    peak_boost = 0;
+  }
+  if ( (mouseX < 50) && (mouseY < 94) && (mouseY > 52)){
+    x_peak_neg = 0;
+    x_peak_pos = 0;
+  }
+  if ( (mouseX < 50) && (mouseY < 142) && (mouseY > 100)){
+    y_peak_neg = 0;
+    y_peak_pos = 0;
+  }
+  if ( (mouseX < 50) && (mouseY < 190) && (mouseY > 148)){
+    peak_temp1 = 0;
+  }
+  if ( (mouseX < 50) && (mouseY < 238) && (mouseY > 196)){
+    peak_temp2 = 0;
+  }
   //change the below section so that it updates in a nicer/more efficient manner
   if (Sensor.available()){
     int value;
     value = Sensor.read();
-    if (strcmp(Sensor.getName(), "x")) {  
-        accelx = value/100; //get the sensor value 
+    if (!strcmp(Sensor.getName(), "x")) {  
+        accelx = getAccelerometerData(value)/100; //get the sensor value 
+        //accelx = value;
         if ((accelx > x_peak_pos) && (accelx > 0)){
           x_peak_pos = accelx;
         }
@@ -81,8 +110,9 @@ void loop(){
         print_values_x();
         draw_bars_x();
       }
-      if (strcmp(Sensor.getName(), "y")) {  
-        accely = value/100; //get the sensor value 
+      if (!strcmp(Sensor.getName(), "y")) {  
+        accely = getAccelerometerData(value)/100; //get the sensor value 
+        //accely = value;
         if ((accely > y_peak_pos) && (accely > 0)){
           y_peak_pos = accely;
         }
@@ -92,29 +122,32 @@ void loop(){
         print_values_y();
         draw_bars_y();
       }
-      if (strcmp(Sensor.getName(), "t1")) {  
-        temp1 = value; //get the sensor value 
+      if (!strcmp(Sensor.getName(), "t1")) {  
+        temp1 = lookup_temp(value); //get the sensor value 
+        //temp1 = value;
         if (temp1 > peak_temp1){
           peak_temp1 = temp1;
         }
         print_values_t1();
         draw_bars_t1();
       }
-      if (strcmp(Sensor.getName(), "t2")) {  
-        temp2 = value; //get the sensor value 
+      if (!strcmp(Sensor.getName(), "t2")) {  
+        temp2 = lookup_temp(value); //get the sensor value 
+        //temp2=value;
         if (temp2 > peak_temp2){
           peak_temp2 = temp2;
         }
         print_values_t2();
         draw_bars_t2();
       }
-      if (strcmp(Sensor.getName(), "bt")){
-        boost = value;
+      if (!strcmp(Sensor.getName(), "bt")){
+        //boost = lookup_boost(value);
+        boost=value;
         if (boost > peak_boost){
           peak_boost = boost;
         }
         print_values_boost();
-        draw_bars_boost();
+        //draw_bars_boost();
       }  
   }
     //for debuging the display without the comms stuff/without sensors
@@ -139,7 +172,7 @@ void print_values_boost(){
   fill(0,0,0);
   stroke(0,255,255); //light blue 
   //current
-  text(boost,274,4+6);
+  text(boost,274,4+6);//trying out other font sizes
   //peak
   text(peak_boost,274,30);
  }
@@ -276,4 +309,86 @@ void draw_bars_t1(){
       rect(twidth+1+51,197,218-twidth,40);
     }
   }
+}
+
+//correctly changed for float values
+float lookup_boost(int boost){
+  //boost = ( (boost-106000) / 259000 );
+  // boost = ( (( boost * 398) / 1000) + 2); //2 is the y intercept
+  //398 changed to 378 for slope...because slope was too steep
+  float fboost = ( (( (float)boost * 378.0) / 1000.0) - 4.0)/10.0; //divide by 10.0 when adding decimals on the display code
+  return fboost;
+}
+
+//correctly converted to float values
+float lookup_temp(int tval){
+  float ftval = (float)tval;
+  if (tval < 89){
+    return (999.9); 
+  }
+  if (tval > 960){
+    return (0.0);
+  }
+  if ((tval <= 960)&&(tval > 932)){
+    return (((ftval-1015.77))/(-1.72));
+  }
+  if ((tval <= 932)&&(tval > 896)){
+    return (((ftval-1042.01))/(-2.26));
+  }
+  if ((tval <= 896)&&(tval > 851)){
+    return (((ftval-1077.38))/(-2.80));
+  }
+  if ((tval <= 851)&&(tval > 791)){
+    return (((ftval-1122.64))/(-3.35));
+  }
+  if ((tval <= 791)&&(tval > 707)){
+    return (((ftval-1175.88))/(-3.88));
+  }
+  if ((tval <= 707)&&(tval > 624)){
+    return (((ftval-1214.41))/(-4.21));
+  }
+  if ((tval <= 624)&&(tval > 532)){
+    return (((ftval-1223.67))/(-4.28));
+  }
+  if ((tval <= 532)&&(tval > 437)){
+    return (((ftval-1186.51))/(-4.05));
+  }
+  if ((tval <= 437)&&(tval > 364)){
+    return (((ftval-1113.49))/(-3.66));
+  }
+  if ((tval <= 364)&&(tval > 306)){
+    return (((ftval-1022.32))/(-3.21));
+  }
+  if ((tval <= 306)&&(tval > 248)){
+    return (((ftval-90.78))/(-2.70));
+  }
+  if ((tval <= 248)&&(tval > 200)){
+    return (((ftval-785.75))/(-2.20));
+  }
+  if ((tval <= 200)&&(tval > 158)){
+    return (((ftval-665.07))/(-1.75));
+  }
+  if ((tval <= 158)&&(tval > 123)){
+    return (((ftval-553.00))/(-1.37));
+  }
+  if ((tval <= 123)&&(tval > 90)){
+    return (((ftval-417.52))/(-.94));
+  }
+}
+
+//correctly converted to use float values
+float getAccelerometerData (int axis){
+  int zerog = 512;
+  if (axis == 4){
+    zerog = zerogx; 
+  }  
+  if (axis == 5){
+    zerog = zerogy;
+  }
+
+  int rc = analogRead(axis);
+  int top =( (zerog - rc) ) ; 
+  float frtrn = ((float)top/(float)158);  //158Vint jumps are 1g for the ADXL213AE (original accel)
+  //154Vint jumps are 1g for the ADXL322 (updated one)
+  return frtrn;
 }
