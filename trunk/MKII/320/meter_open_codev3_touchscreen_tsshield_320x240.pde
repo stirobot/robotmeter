@@ -1,4 +1,5 @@
 #include <HardwareSensor.h>
+
 const float sintable[90] = {
   0.0175,
   0.0349,
