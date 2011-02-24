@@ -9,10 +9,8 @@
 
 //debug notes:
 //temperature sensors work
-///need to post about strcompare working backwards???
-//boost sensor always shows full high (faulty wiring or faulty sensor)
 //accel doesn't do anything (probably faulty wiring) (but could be wrong algorithm??)
-
+POINT pt;
 float boost = 0;
 float temp1 = 0;
 float temp2 = 0;
@@ -45,6 +43,8 @@ int severeT2 = 300;
 int zerogy = 512;
 int zerogx = 512;
 
+int tempX, tempY;
+
 void setup(){
   Sensor.begin(19200);
   background(0); //black background
@@ -73,82 +73,83 @@ void setup(){
 
 //get the readings from the arduino
 void loop(){
-  gettouch(); //update the mouse coordinates
-  //add section to reset peaks on touch per area
-  //tapping the bars to the right of the sensor label resets that peak
-  //tapping the label change modes (TODO)
-  if ( (mouseX < 50) && (mouseY < 46) && (mouseY > 4)){
-    peak_boost = 0;
-  }
-  if ( (mouseX < 50) && (mouseY < 94) && (mouseY > 52)){
-    x_peak_neg = 0;
-    x_peak_pos = 0;
-  }
-  if ( (mouseX < 50) && (mouseY < 142) && (mouseY > 100)){
-    y_peak_neg = 0;
-    y_peak_pos = 0;
-  }
-  if ( (mouseX < 50) && (mouseY < 190) && (mouseY > 148)){
-    peak_temp1 = 0;
-  }
-  if ( (mouseX < 50) && (mouseY < 238) && (mouseY > 196)){
-    peak_temp2 = 0;
-  }
-  //change the below section so that it updates in a nicer/more efficient manner
-  if (Sensor.available()){
-    int value;
-    value = Sensor.read();
-    if (!strcmp(Sensor.getName(), "x")) {  
-        accelx = getAccelerometerData(value)/100; //get the sensor value 
-        //accelx = value;
-        if ((accelx > x_peak_pos) && (accelx > 0)){
-          x_peak_pos = accelx;
+    //tapping the bars to the right of the sensor label resets that peak
+    //tapping the label change modes (TODO)
+   if(touch_getCursor(&pt)){
+   if ( (pt.x < 50) && (pt.y < 46) && (pt.y > 4)){
+      peak_boost = 0;
+    }
+    if ( (pt.x < 50) && (pt.y < 94) && (pt.y > 52)){
+      x_peak_neg = 0;
+      x_peak_pos = 0;
+    }
+    if ( (pt.x < 50) && (pt.y < 142) && (pt.y > 100)){
+      y_peak_neg = 0;
+      y_peak_pos = 0;
+    }
+    if ( (pt.x < 50) && (pt.y < 190) && (pt.y > 148)){
+      peak_temp1 = 0;
+    }
+    if ( (pt.x < 50) && (pt.y < 238) && (pt.y > 196)){
+      peak_temp2 = 0;
+    }
+    }
+    //change the below section so that it updates in a nicer/more efficient manner
+    if (Sensor.available()){
+      int value;
+      value = Sensor.read();
+      if (!strcmp(Sensor.getName(), "x")) {  
+          accelx = getAccelerometerData(value)/100; //get the sensor value 
+          //accelx = value;
+          if ((accelx > x_peak_pos) && (accelx > 0)){
+            x_peak_pos = accelx;
+          }
+          if ((accelx < x_peak_neg) && (accelx < 0)){
+            x_peak_neg = accelx;
+          }
+          print_values_x();
+          draw_bars_x();
         }
-        if ((accelx < x_peak_neg) && (accelx < 0)){
-          x_peak_neg = accelx;
+        if (!strcmp(Sensor.getName(), "y")) {  
+          accely = getAccelerometerData(value)/100; //get the sensor value 
+          //accely = value;
+          if ((accely > y_peak_pos) && (accely > 0)){
+            y_peak_pos = accely;
+          }
+          if ((accely < y_peak_neg) && (accely < 0)){
+            y_peak_neg = accely;
+          }        
+          print_values_y();
+          draw_bars_y();
         }
-        print_values_x();
-        draw_bars_x();
-      }
-      if (!strcmp(Sensor.getName(), "y")) {  
-        accely = getAccelerometerData(value)/100; //get the sensor value 
-        //accely = value;
-        if ((accely > y_peak_pos) && (accely > 0)){
-          y_peak_pos = accely;
+        if (!strcmp(Sensor.getName(), "t1")) {  
+          temp1 = lookup_temp(value); //get the sensor value 
+          //temp1 = value;
+          if (temp1 > peak_temp1){
+            peak_temp1 = temp1;
+          }
+          print_values_t1();
+          draw_bars_t1();
         }
-        if ((accely < y_peak_neg) && (accely < 0)){
-          y_peak_neg = accely;
-        }        
-        print_values_y();
-        draw_bars_y();
-      }
-      if (!strcmp(Sensor.getName(), "t1")) {  
-        temp1 = lookup_temp(value); //get the sensor value 
-        //temp1 = value;
-        if (temp1 > peak_temp1){
-          peak_temp1 = temp1;
+        if (!strcmp(Sensor.getName(), "t2")) {  
+          temp2 = lookup_temp(value); //get the sensor value 
+          //temp2=value;
+          if (temp2 > peak_temp2){
+            peak_temp2 = temp2;
+          }
+          print_values_t2();
+          draw_bars_t2();
         }
-        print_values_t1();
-        draw_bars_t1();
-      }
-      if (!strcmp(Sensor.getName(), "t2")) {  
-        temp2 = lookup_temp(value); //get the sensor value 
-        //temp2=value;
-        if (temp2 > peak_temp2){
-          peak_temp2 = temp2;
-        }
-        print_values_t2();
-        draw_bars_t2();
-      }
-      if (!strcmp(Sensor.getName(), "bt")){
-        //boost = lookup_boost(value);
-        boost=value;
-        if (boost > peak_boost){
-          peak_boost = boost;
-        }
-        print_values_boost();
-        //draw_bars_boost();
-      }  
+        if (!strcmp(Sensor.getName(), "bt")){
+          boost = lookup_boost(value);
+          //boost=value;
+          if (boost > peak_boost){
+            peak_boost = boost;
+          }
+          print_values_boost();
+          //draw_bars_boost();
+        } 
+  //  } 
   }
     //for debuging the display without the comms stuff/without sensors
     /*boost = boost + random(2);
@@ -206,6 +207,7 @@ void print_values_boost(){
   text(temp2,274,196+6);
   text(peak_temp1,274,148+26);  
 }
+
 
 void draw_bars_boost(){
   float twidth=0;
@@ -310,6 +312,152 @@ void draw_bars_t1(){
     }
   }
 }
+
+/*  Justin D stuff below...needs some work
+1) fill out the left side of the bar only on startup
+2) grow bar to right or shrink to left by drawing small color or black rectangles
+3) if the color changes due to a warning change the whole bar to the left (need to keep track of colors)
+4) keep peaks 
+OR just touch up the code to fix the left side of the bar thing to work
+void draw_bars_boost(){
+  float twidth=0;
+  float o_twidth=0;
+  float peak_twidth=0;
+
+    o_twidth=218/maxBoost*o_boost;
+    peak_twidth=218/maxBoost*o_boost;
+    if(boost > o_boost) { //the bar is getting bigger
+      fill(0,255,0); //green
+      stroke(0,255,0);
+      if (boost > warnBoost){
+        fill(255,255,0);
+        stroke(255,255,0);
+      }
+      if (boost > severeBoost){
+        fill(255,0,0);
+        stroke(255,0,0);
+      }
+      rect(51+o_twidth+1,5,twidth-o_twidth,40);
+    } 
+    else {  //the bar is getting smaller
+
+      stroke(0,0,0);
+      fill(0,0,0);
+      rect(twidth+1+51,5,218-twidth,40);
+      if(o_twidth == peak_twidth) { //old width was the highest yet lets leave a line behind
+        if(o_twidth-peak_twidth-1 > 0) { 
+          rect(twidth+1+51,5,o_twidth-twidth-1,40);
+        } 
+        else {
+          //only one pixel less so do nothing.
+        }
+      } 
+      else {
+        rect(twidth+1+51,5,o_twidth-twidth,40);
+      }
+    }
+}
+
+
+  //x and y will be displayed as positive only (absolute value) in the bar graph
+  //they will be light blue and have no warning/severe values
+
+void draw_bars_x(){
+  //x
+  float twidth=0;
+  fill(0,255,255); //light blue
+  stroke(0,255,255);
+  twidth = 218/200*abs(accelx*100);
+  rect(51,53,twidth,40);
+  if(o_x >= abs(accelx)){
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,53,218-twidth-1,40);
+  }
+}
+  
+ void draw_bars_y(){
+  //y
+  float twidth=0;
+  fill(0,255,255); //light blue
+  stroke(0,255,255);
+  twidth=218/200*abs(accely*100);
+  rect(51,101,twidth,40);
+  if (o_y >= abs(accely)){
+    stroke(0,0,0);
+    fill(0,0,0);
+    rect(twidth+1+51,101,218-twidth-1,40);
+  }
+ }
+  
+void draw_bars_t1(){
+  //t1
+  float twidth=0;
+  if(temp1 > o_temp1) { //the bar is getting bigger
+      fill(0,255,0); //green
+      stroke(0,255,0);
+      if (temp1 > warnT1){
+        fill(255,255,0);
+        stroke(255,255,0);
+      }
+      if (temp1 > severeT1){
+        fill(255,0,0);
+        stroke(255,0,0);
+      }
+      twidth = temp1;
+      rect(51+o_temp1+1,149,temp1-o_temp1,40);
+    } 
+    else { // the bar is getting smaller
+      stroke(0,0,0);
+      fill(0,0,0);
+      rect(twidth+1+51,149,218-twidth,40);
+      if(o_temp1 == peak_temp1) {
+        if(o_temp1-1-temp1>0) {//leave a pixelwidth peak line
+          rect(twidth+1+51,149,o_temp1-temp1-1,40); 
+        } 
+        else {
+          //only one less so do nothing
+        }
+      } 
+      else {
+         rect(twidth+1+51,149,o_temp1-temp1,40);
+      }
+    }
+  }
+
+void draw_bars_t2(){
+  //t2 
+  float twidth=0;
+  if(temp2 > o_temp2) { //the bar is getting bigger
+      fill(0,255,0); //green
+      stroke(0,255,0);
+      if (temp2 > warnT2){
+        fill(255,255,0);
+        stroke(255,255,0);
+      }
+      if (temp2 > severeT2){
+        fill(255,0,0);
+        stroke(255,0,0);
+      }
+      twidth = temp2;
+      rect(51+o_temp2+1,197,temp2-o_temp2,40);
+    } 
+    else { // the bar is getting smaller
+       stroke(0,0,0);
+       fill(0,0,0);
+       rect(twidth+1+51,197,218-twidth,40);
+      if(o_temp2==peak_temp2) { 
+        if((o_temp2-temp2-1)>0){
+          rect(twidth+1+51,197,o_temp2-temp2-1,40);
+        } else {
+          //one one pixel less so do nothing
+        }
+      } else {
+        rect(twidth+1+51,197,o_temp2-temp2,40);
+      } 
+     }
+}
+*/
 
 //correctly changed for float values
 float lookup_boost(int boost){
