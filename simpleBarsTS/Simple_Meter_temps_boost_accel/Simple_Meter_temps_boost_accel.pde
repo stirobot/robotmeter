@@ -150,8 +150,8 @@ void update_x(){
   if ((accelx < x_peak_neg) && (accelx < 0)){
     x_peak_neg = accelx;
   }
-  print_values_x();
-  draw_bars_x();
+  print_values_x(1);
+  draw_bars_x(1);
 }
 
 void update_y(){
@@ -161,76 +161,82 @@ void update_y(){
   if ((accely < y_peak_neg) && (accely < 0)){
     y_peak_neg = accely;
   }        
-  print_values_y();
-  draw_bars_y();
+  print_values_y(2);
+  draw_bars_y(2);
 }
 
 void update_t1(){
   if (temp1 > peak_temp1){
     peak_temp1 = temp1;
   }
-  print_values_t1();
-  draw_bars_t1();
+  print_values_t1(3);
+  draw_bars_t1(3);
 }
 
 void update_t2(){
   if (temp2 > peak_temp2){
     peak_temp2 = temp2;
   }
-  print_values_t2();
-  draw_bars_t2();
+  print_values_t2(4);
+  draw_bars_t2(4);
 }
 
 void update_boost(){ 
   if (boost > peak_boost){
     peak_boost = boost;
   }
-  print_values_boost();
-  draw_bars_boost();
+  print_values_boost(0);
+  draw_bars_boost(0);
 }
 
 //TODO split this into many functions
-void print_values_boost(){
+void print_values_boost(int rowIndex){
+  int row = rowIndex*48+4+6;
   fill(0,0,0);
   stroke(0,255,255); //light blue 
   //current
-  text(boost,274,4+6);//trying out other font sizes
+  text(boost,274,row);//trying out other font sizes
   //peak
-  text(peak_boost,274,30);
+  text(peak_boost,274,20+row);
 }
 
-void print_values_x(){
+void print_values_x(int rowIndex){
+  int row = rowIndex*48+4+6;
   fill(0,0,0);
   stroke(0,255,255); //light blue 
-  text(accelx,274,52+6);
-  text(x_peak_pos,274,52+20);
-  text(x_peak_neg,274,52+30);
+  text(accelx,274,row);
+  text(x_peak_pos,274,row+10);
+  text(x_peak_neg,274,row+20);
 }
 
-void print_values_y(){
+void print_values_y(int rowIndex){
+  int row = rowIndex*48+4+6;
   fill(0,0,0);
   stroke(0,255,255); //light blue 
-  text(accely,274,100+6);
-  text(y_peak_pos,274,100+20);
-  text(y_peak_neg,274,100+30);
+  text(accely,274,row);
+  text(y_peak_pos,274,row+10);
+  text(y_peak_neg,274,row+20);
 }
 
-void print_values_t1(){
+void print_values_t1(int rowIndex){
+  int row = rowIndex*48+4+6;
   fill(0,0,0);
   stroke(0,255,255); //light blue 
-  text(temp1,274,148+6);
-  text(peak_temp2,274,196+26);
+  text(temp1,274,row);
+  text(peak_temp1,274,row+20);
 }
 
-void print_values_t2(){
+void print_values_t2(int rowIndex){
+  int row = 4+6+48*rowIndex;
   fill(0,0,0);
   stroke(0,255,255); //light blue 
-  text(temp2,274,196+6);
-  text(peak_temp1,274,148+26);  
+  text(temp2,274,row);
+  text(peak_temp2,274,row+20);  
 }
 
 
-void draw_bars_boost(){
+void draw_bars_boost(int rowIndex){
+  int row = rowIndex*48+5;
   float twidth=0;
   //boost
   if(boost != o_boost){
@@ -245,11 +251,11 @@ void draw_bars_boost(){
       stroke(255,0,0);
     }
     twidth=218/maxBoost*boost;
-    rect(51,5,twidth,40);
+    rect(51,row,twidth,40);
     if (o_boost >= boost){
       stroke(0,0,0);
       fill(0,0,0);
-      rect(twidth+1+51,5,218-twidth,40);
+      rect(twidth+1+51,row,218-twidth,40);
     }
   }
 }
@@ -258,36 +264,38 @@ void draw_bars_boost(){
 //x and y will be displayed as positive only (absolute value) in the bar graph
 //they will be light blue and have no warning/severe values
 
-void draw_bars_x(){
+void draw_bars_x(int rowIndex){
   //x
+  int row = rowIndex*48+5;
   float twidth=0;
   fill(0,255,255); //light blue
   stroke(0,255,255);
   twidth = 218/200*abs(accelx*100);
-  rect(51,53,twidth,40);
+  rect(51,row,twidth,40);
   if(o_x >= abs(accelx)){
     stroke(0,0,0);
     fill(0,0,0);
-    rect(twidth+1+51,53,218-twidth-1,40);
+    rect(twidth+1+51,row,218-twidth-1,40);
   }
 }
 
-void draw_bars_y(){
-  //y
+void draw_bars_y(int rowIndex){
+  int row = rowIndex*48+5;
   float twidth=0;
   fill(0,255,255); //light blue
   stroke(0,255,255);
   twidth=218/200*abs(accely*100);
-  rect(51,101,twidth,40);
+  rect(51,row,twidth,40);
   if (o_y >= abs(accely)){
     stroke(0,0,0);
     fill(0,0,0);
-    rect(twidth+1+51,101,218-twidth-1,40);
+    rect(twidth+1+51,row,218-twidth-1,40);
   }
 }
 
-void draw_bars_t1(){
+void draw_bars_t1(int rowIndex){
   //t1
+  int row = rowIndex*48+5;
   float twidth=0;
   if (temp1 != o_temp1){
     fill(0,255,0); //green
@@ -301,17 +309,18 @@ void draw_bars_t1(){
       stroke(255,0,0);
     }
     twidth = temp1;
-    rect(51,149,twidth,40);
+    rect(51,row,twidth,40);
     if (o_temp1 >= temp1){
       stroke(0,0,0);
       fill(0,0,0);
-      rect(twidth+1+51,149,218-twidth,40);
+      rect(twidth+1+51,row,218-twidth,40);
     }
   }
 }
 
-void draw_bars_t2(){
+void draw_bars_t2(int rowIndex){
   //t2 
+  int row = rowIndex*48+5;
   float twidth=0;
   if (temp2 != o_temp2){
     fill(0,255,0); //green
@@ -325,11 +334,11 @@ void draw_bars_t2(){
       stroke(255,0,0);
     }
     twidth = temp2;
-    rect(51,197,twidth,40);
+    rect(51,row,twidth,40);
     if (o_temp2 >= temp2){
       stroke(0,0,0);
       fill(0,0,0);
-      rect(twidth+1+51,197,218-twidth,40);
+      rect(twidth+1+51,row,218-twidth,40);
     }
   }
 }
