@@ -1,4 +1,3 @@
-
 #include <AFSoftSerial.h>
 
 int incomingByte=0;
@@ -59,12 +58,12 @@ void get_file_num(){
    vSerial.print(13, BYTE);
    delay(1000);  //wait a second
    
-   while (char i = vSerial.read()){ //umlauted Ø should be check character...ie hex 98 or dec 152
+   while (char i = vSerial.read()){ //umlauted ï¿½ should be check character...ie hex 98 or dec 152
 	Serial.print(i); //debug to serial monitor on IDE
 	if (i == '%'){
           fileNumber = vSerial.read() + 1; //should work, but might have to convert to int and back
 	}
-        if (i == 'Ø'){
+        if (i == 'ï¿½'){
           return;
         }
    }
