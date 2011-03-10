@@ -8,6 +8,7 @@
 //  Turbo F
 
 //debug notes:
+bool debugMode = false;
 //temperature sensors work
 //accel doesn't do anything (probably faulty wiring) (but could be wrong algorithm??)
 POINT pt;
@@ -100,64 +101,39 @@ void loop(){
     value = Sensor.read();
     if (!strcmp(Sensor.getName(), "x")) {  
       accelx = getAccelerometerData(value)/100; //get the sensor value 
-      //accelx = value;
-      if ((accelx > x_peak_pos) && (accelx > 0)){
-        x_peak_pos = accelx;
-      }
-      if ((accelx < x_peak_neg) && (accelx < 0)){
-        x_peak_neg = accelx;
-      }
-      print_values_x();
-      draw_bars_x();
+      update_x();
     }
     if (!strcmp(Sensor.getName(), "y")) {  
       accely = getAccelerometerData(value)/100; //get the sensor value 
-      //accely = value;
-      if ((accely > y_peak_pos) && (accely > 0)){
-        y_peak_pos = accely;
-      }
-      if ((accely < y_peak_neg) && (accely < 0)){
-        y_peak_neg = accely;
-      }        
-      print_values_y();
-      draw_bars_y();
+      update_y();
     }
     if (!strcmp(Sensor.getName(), "t1")) {  
       temp1 = lookup_temp(value); //get the sensor value 
-      //temp1 = value;
-      if (temp1 > peak_temp1){
-        peak_temp1 = temp1;
-      }
-      print_values_t1();
-      draw_bars_t1();
+      update_t1();
     }
     if (!strcmp(Sensor.getName(), "t2")) {  
       temp2 = lookup_temp(value); //get the sensor value 
-      //temp2=value;
-      if (temp2 > peak_temp2){
-        peak_temp2 = temp2;
-      }
-      print_values_t2();
-      draw_bars_t2();
+      update_t2();
     }
     if (!strcmp(Sensor.getName(), "bt")){
       boost = lookup_boost(value);
-      //boost=value;
-      if (boost > peak_boost){
-        peak_boost = boost;
-      }
-      print_values_boost();
-      //draw_bars_boost();
+      update_boost();
     } 
     //  } 
   }
   //for debuging the display without the comms stuff/without sensors
-  /*boost = boost + random(2);
-   accelx = accelx + .01;
-   accely = accely + .01;
-   temp1 = temp1 + random(2);
-   temp2 = temp2 + random(2); */
-
+  if(debugMode){
+    boost = boost + random(2);
+    update_boost();
+    accelx = accelx + .01;
+    update_x();  
+    accely = accely + .01;
+    update_y();
+    temp1 = temp1 + random(2);
+    update_t1();
+    temp2 = temp2 + random(2);
+    update_t2();
+  }
   //avoid flicker as much as possible by only redrawing when there is a change
   //skip the accel readings because they will jump all over the place anyways?
   o_boost = boost;
@@ -167,6 +143,51 @@ void loop(){
   o_y = abs(accely);
 }
 
+void update_x(){
+  if ((accelx > x_peak_pos) && (accelx > 0)){
+    x_peak_pos = accelx;
+  }
+  if ((accelx < x_peak_neg) && (accelx < 0)){
+    x_peak_neg = accelx;
+  }
+  print_values_x();
+  draw_bars_x();
+}
+
+void update_y(){
+  if ((accely > y_peak_pos) && (accely > 0)){
+    y_peak_pos = accely;
+  }
+  if ((accely < y_peak_neg) && (accely < 0)){
+    y_peak_neg = accely;
+  }        
+  print_values_y();
+  draw_bars_y();
+}
+
+void update_t1(){
+  if (temp1 > peak_temp1){
+    peak_temp1 = temp1;
+  }
+  print_values_t1();
+  draw_bars_t1();
+}
+
+void update_t2(){
+  if (temp2 > peak_temp2){
+    peak_temp2 = temp2;
+  }
+  print_values_t2();
+  draw_bars_t2();
+}
+
+void update_boost(){ 
+  if (boost > peak_boost){
+    peak_boost = boost;
+  }
+  print_values_boost();
+  draw_bars_boost();
+}
 
 //TODO split this into many functions
 void print_values_boost(){
