@@ -70,7 +70,7 @@ void setup(){
 
   //bar labels
   stroke(255,255,255); //white looks good...red is unreable in sunlight
-  text("boost",8,4+18+48*indexMapping[0],8);
+  text("boost",8,4+18+48*indexMapping[0],8); 
   text("x",20, 4+20+48*indexMapping[1],18);
   text("y",20,4+20+48*indexMapping[2],18);
   text("t1",14,4+20+48*indexMapping[3],18);
@@ -102,42 +102,73 @@ void loop(){
     }
   }
   //change the below section so that it updates in a nicer/more efficient manner
-  if (Sensor.available()){
-    int value;
-    value = Sensor.read();
-    if (!strcmp(Sensor.getName(), "x")) {  
-      accelx = getAccelerometerData(value)/100; //get the sensor value 
-      update_x();
+  if(!debugMode) {
+    if (Sensor.available()){
+      int value;
+      value = Sensor.read();
+      if (!strcmp(Sensor.getName(), "x")) {  
+        accelx = getAccelerometerData(value)/100; //get the sensor value 
+        update_x();
+      }
+      if (!strcmp(Sensor.getName(), "y")) {  
+        accely = getAccelerometerData(value)/100; //get the sensor value 
+        update_y();
+      }
+      if (!strcmp(Sensor.getName(), "t1")) {  
+        temp1 = lookup_temp(value); //get the sensor value 
+        update_t1();
+      }
+      if (!strcmp(Sensor.getName(), "t2")) {  
+        temp2 = lookup_temp(value); //get the sensor value 
+        update_t2();
+      }
+      if (!strcmp(Sensor.getName(), "bt")){
+        boost = lookup_boost(value);
+        update_boost();
+      }
     }
-    if (!strcmp(Sensor.getName(), "y")) {  
-      accely = getAccelerometerData(value)/100; //get the sensor value 
-      update_y();
+  } else {
+    //for debuging the display without the comms stuff/without sensors
+    boost = boost + random(3) - 1;
+    if (boost > 26) {
+      boost -= 26;
     }
-    if (!strcmp(Sensor.getName(), "t1")) {  
-      temp1 = lookup_temp(value); //get the sensor value 
-      update_t1();
+    if (boost < 0 ) {
+      boost += 26;
     }
-    if (!strcmp(Sensor.getName(), "t2")) {  
-      temp2 = lookup_temp(value); //get the sensor value 
-      update_t2();
-    }
-    if (!strcmp(Sensor.getName(), "bt")){
-      boost = lookup_boost(value);
-      update_boost();
-    } 
-    //  } 
-  }
-  //for debuging the display without the comms stuff/without sensors
-  if(debugMode){
-    boost = boost + random(2);
     update_boost();
-    accelx = accelx + .01;
+    accelx = accelx + (float)(random(5)-1)/100;
+    if (accelx > 2.18) {
+      accelx -= 4.36;
+    }
+    if (accelx < -2.18) {
+      accelx += 4.36;
+    }
     update_x();  
-    accely = accely + .01;
+
+    accely = accely + (float)(random(5)-1)/100;
+    if (accely > 2.18) {
+      accely -= 4.36;
+    }
+    if (accely < -2.18) {
+      accely += 4.36;
+    }
     update_y();
-    temp1 = temp1 + random(2);
+    temp1 = temp1 + random(5);
+    if(temp1 > 218) {
+      temp1 -= 218;
+    } 
+    if(temp1 < 0) {
+      temp1 += 218;
+    }
     update_t1();
-    temp2 = temp2 + random(2);
+    temp2 = temp2 + random(5);
+    if(temp2 > 218){
+      temp2 -= 218;
+    }
+    if(temp2 < 0){
+      temp2 += 218;
+    }
     update_t2();
   }
   //avoid flicker as much as possible by only redrawing when there is a change
