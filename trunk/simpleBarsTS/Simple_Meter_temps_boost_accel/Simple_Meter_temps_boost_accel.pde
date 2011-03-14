@@ -45,11 +45,17 @@ int zerogy = 512;
 int zerogx = 512;
 
 int tempX, tempY;
+int indexMapping[5];
 
 void setup(){
   Sensor.begin(19200);
   background(0); //black background
 
+  indexMapping[0] = 1; //index 0 is boost
+  indexMapping[1] = 2; //index 1 is x
+  indexMapping[2] = 3; //index 2 is y
+  indexMapping[3] = 4; //index 3 is tempature 1
+  indexMapping[4] = 0; //index 4 is tempature 2
   //draw the rectangles and labels
   //-spacing should be 40 pixels tall for each rectangle
   //-all rects start at 50 and go 2xx pixels wide
@@ -64,11 +70,11 @@ void setup(){
 
   //bar labels
   stroke(255,255,255); //white looks good...red is unreable in sunlight
-  text("boost",8,22,8);
-  text("x",20, 52+20,18);
-  text("y",20,100+20,18);
-  text("t1",14,148+20,18);
-  text("t2",14,196+20,18);
+  text("boost",8,4+18+48*indexMapping[0],8);
+  text("x",20, 4+20+48*indexMapping[1],18);
+  text("y",20,4+20+48*indexMapping[2],18);
+  text("t1",14,4+20+48*indexMapping[3],18);
+  text("t2",14,4+20+48*indexMapping[4],18);
 
 }
 
@@ -150,8 +156,8 @@ void update_x(){
   if ((accelx < x_peak_neg) && (accelx < 0)){
     x_peak_neg = accelx;
   }
-  print_values_x(1);
-  draw_bars_x(1);
+  print_values_x(indexMapping[1]);
+  draw_bars_x(indexMapping[1]);
 }
 
 void update_y(){
@@ -161,32 +167,32 @@ void update_y(){
   if ((accely < y_peak_neg) && (accely < 0)){
     y_peak_neg = accely;
   }        
-  print_values_y(2);
-  draw_bars_y(2);
+  print_values_y(indexMapping[2]);
+  draw_bars_y(indexMapping[2]);
 }
 
 void update_t1(){
   if (temp1 > peak_temp1){
     peak_temp1 = temp1;
   }
-  print_values_t1(3);
-  draw_bars_t1(3);
+  print_values_t1(indexMapping[3]);
+  draw_bars_t1(indexMapping[3]);
 }
 
 void update_t2(){
   if (temp2 > peak_temp2){
     peak_temp2 = temp2;
   }
-  print_values_t2(4);
-  draw_bars_t2(4);
+  print_values_t2(indexMapping[4]);
+  draw_bars_t2(indexMapping[4]);
 }
 
 void update_boost(){ 
   if (boost > peak_boost){
     peak_boost = boost;
   }
-  print_values_boost(0);
-  draw_bars_boost(0);
+  print_values_boost(indexMapping[0]);
+  draw_bars_boost(indexMapping[0]);
 }
 
 //TODO split this into many functions
