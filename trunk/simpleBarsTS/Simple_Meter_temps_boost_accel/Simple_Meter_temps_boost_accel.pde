@@ -23,6 +23,7 @@ float x_peak_pos = 0;
 float y_peak_neg = 0;
 float y_peak_pos = 0;
 float peak_boost = 0;
+
 float peak_temp1 = 0;
 float peak_temp2 = 0;
 float o_boost = 0; 
@@ -38,8 +39,8 @@ int warnT1 = 200;
 int warnT2 = 200;
 
 int severeBoost = 23;
-int severeT1 = 300;
-int severeT2 = 300;
+int severeT1 = 280;
+int severeT2 = 380;
 
 int zerogy = 512;
 int zerogx = 512;
@@ -47,6 +48,7 @@ int zerogx = 512;
 int tempX, tempY;
 int indexMapping[5];
 
+int o_zone_boost = 0; //used to store old state of which zone we were in
 void setup(){
   Sensor.begin(19200);
   background(0); //black background
@@ -83,21 +85,22 @@ void loop(){
   //tapping the bars to the right of the sensor label resets that peak
   //tapping the label change modes (TODO)
   if(touch_getCursor(&pt)){
-    if ( (pt.x < 50) && (pt.y < 46) && (pt.y > 4)){
+    if ( (pt.x < 50) && (pt.y < 46+indexMapping[0]*48) && (pt.y > 4+indexMapping[0]*48)){
       peak_boost = 0;
+      draw_bars_boost_simple();
     }
-    if ( (pt.x < 50) && (pt.y < 94) && (pt.y > 52)){
+    if ( (pt.x < 50) && (pt.y < 46+indexMapping[1]*48) && (pt.y > 4+indexMapping[1]*48)){
       x_peak_neg = 0;
       x_peak_pos = 0;
     }
-    if ( (pt.x < 50) && (pt.y < 142) && (pt.y > 100)){
+    if ( (pt.x < 50) && (pt.y < indexMapping[2]*48) && (pt.y > 4+indexMapping[2]*48)){
       y_peak_neg = 0;
       y_peak_pos = 0;
     }
-    if ( (pt.x < 50) && (pt.y < 190) && (pt.y > 148)){
+    if ( (pt.x < 50) && (pt.y < 46+indexMapping[3]*48) && (pt.y > 4+indexMapping[3]*48)){
       peak_temp1 = 0;
     }
-    if ( (pt.x < 50) && (pt.y < 238) && (pt.y > 196)){
+    if ( (pt.x < 50) && (pt.y < 46+indexMapping[4]*48) && (pt.y > 46+indexMapping[4]*48)){
       peak_temp2 = 0;
     }
   }
@@ -129,12 +132,12 @@ void loop(){
     }
   } else {
     //for debuging the display without the comms stuff/without sensors
-    boost = boost + random(3) - 1;
-    if (boost > 26) {
-      boost -= 26;
+    boost = boost + random(2) - .5+random(10)/10;
+    if (boost > maxBoost) {
+      boost -= maxBoost;
     }
     if (boost < 0 ) {
-      boost += 26;
+      boost += maxBoost;
     }
     update_boost();
     accelx = accelx + (float)(random(5)-1)/100;
@@ -155,19 +158,19 @@ void loop(){
     }
     update_y();
     temp1 = temp1 + random(5);
-    if(temp1 > 218) {
-      temp1 -= 218;
+    if(temp1 > maxT1) {
+      temp1 -= maxT1;
     } 
     if(temp1 < 0) {
-      temp1 += 218;
+      temp1 += maxT1;
     }
     update_t1();
     temp2 = temp2 + random(5);
-    if(temp2 > 218){
-      temp2 -= 218;
+    if(temp2 > maxT2){
+      temp2 -= maxT2;
     }
     if(temp2 < 0){
-      temp2 += 218;
+      temp2 += maxT2;
     }
     update_t2();
   }
@@ -271,29 +274,104 @@ void print_values_t2(int rowIndex){
   text(peak_temp2,274,row+20);  
 }
 
-
+void draw_bars_boost_simple(){
+  int width=218*boost/maxBoost;
+  int top = indexMapping[0]*48+5;
+  if(boost>severeBoost){
+    fill(255,0,0);
+    stroke(255,0,0);
+  } else if(boost > warnBoost){
+    fill(255,255,0);
+    stroke(255,255,0);
+  } else {
+    fill(0,255,0);
+    stroke(0,255,0);
+  }
+  rect(51,top,width,40);
+  fill(0,0,0);
+  stroke(0,0,0);
+  rect(width+51,top,218-width,40);
+}
 void draw_bars_boost(int rowIndex){
   int row = rowIndex*48+5;
-  float twidth=0;
+  float left=51;
+  float o_right=218*o_boost/maxBoost;
+  float right=218*boost/maxBoost;
   //boost
-  if(boost != o_boost){
-    fill(0,255,0); //green
-    stroke(0,255,0);
-    if (boost > warnBoost){
-      fill(255,255,0);
-      stroke(255,255,0);
+  if(o_right != right){
+    int zone=0;
+    if(boost > severeBoost){
+      zone = 2;
+    } else if (boost > warnBoost) {
+      zone = 1;
     }
-    if (boost > severeBoost){
-      fill(255,0,0);
-      stroke(255,0,0);
-    }
-    twidth=218/maxBoost*boost;
-    rect(51,row,twidth,40);
-    if (o_boost >= boost){
-      stroke(0,0,0);
+    if(o_right < right){
+      //we are increasing
+      if(zone == 0){
+        //still in the normal zone so just do the delta
+        fill(0,255,0);
+        stroke(0,255,0);
+        rect(o_right+left,row,right-o_right,40);
+      }
+      if(zone == 1){
+        //in the warning zone
+        if(o_zone_boost == 0){
+          //was in the normal zone so we need to recolor the whole range
+          fill(255,255,0);
+          stroke(255,255,0);
+          rect(left,row,right,40);
+        } else {
+          //we were in zone 1 so just do the delta
+          fill(255,255,0);
+          stroke(255,255,0);
+          rect(o_right+left,row,right-o_right,40);
+        }
+      }
+      if(zone == 2){
+        //in the severe zone
+        if(o_zone_boost == 2)
+        {
+          //we are in the same zone just do the delta
+          fill(255,0,0);
+          stroke(255,0,0);
+          rect(o_right+left,row,right-o_right,40);
+        } else {
+          //we were in an old zone so just fill in the whole range
+          fill(255,0,0);
+          stroke(255,0,0);
+          rect(left,row,right,40);
+        }
+      }
+    } else { //we are going backwards
+      if(zone != o_zone_boost){
+        //we are going from one zone to the next so we have to recolor the full bar
+        if(zone == 0){
+          fill(0,255,0);
+          stroke(0,255,0);
+          rect(left,row,right,40);
+        } else {
+          //we have to be in the warn zone
+          fill(255,255,0);
+          stroke(255,255,0);
+          rect(left,row,right,40);
+        }
+      }
+      //we still have to do the blank delta
       fill(0,0,0);
-      rect(twidth+1+51,row,218-twidth,40);
+      stroke(0,0,0); 
+      float peak_right=218*peak_boost/maxBoost;
+      if(right >= peak_right-2) {
+        //do nothing as we are in the peak line area
+      } else if(o_right >= peak_right-2){
+        //we were in the peak line area but are not any more
+        rect(right+left,row,peak_right-2-right,40);
+      } else {
+        //we weren't in the peak line area so just do normal delta
+        rect(right+left,row,o_right-right+1,40);
+      }  
     }
+    o_zone_boost = zone;
+    o_boost = boost;
   }
 }
 
@@ -345,7 +423,7 @@ void draw_bars_t1(int rowIndex){
       fill(255,0,0);
       stroke(255,0,0);
     }
-    twidth = temp1;
+    twidth = temp1/maxT1*218;
     rect(51,row,twidth,40);
     if (o_temp1 >= temp1){
       stroke(0,0,0);
@@ -370,7 +448,7 @@ void draw_bars_t2(int rowIndex){
       fill(255,0,0);
       stroke(255,0,0);
     }
-    twidth = temp2;
+    twidth = temp2/maxT2*218;
     rect(51,row,twidth,40);
     if (o_temp2 >= temp2){
       stroke(0,0,0);
