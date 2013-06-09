@@ -25,8 +25,8 @@
  curve for water temp sensor
  delete all serial printing stuff
  add graphics drawing functions
- test for compiled size
- 
+ add hold on button to reset
+  
  //pin reference for tft from;
  http://webshed.org/wiki/18tftbreakout
  eBay Board	 Adafruit Board	Arduino conections
@@ -60,7 +60,7 @@ int mode = 1;
 
 //two buttons:
 int buttonApin = 6;
-int buttonBpin = 7;
+int buzzerPin = 2;
 
 //global peaks...so that you can switch modes and preserve peaks
 long oil_psi_peak = 0;
@@ -98,9 +98,14 @@ void setup(){
   }
   Serial.println("SD OK");
 
+  for (int b=0; b < 5; b++){ 
+    tone(2,1500);
+    delay(500);
+    noTone(2);
+  }
+
   bmpDraw("e36side.bmp",0,0);
   //delay(10);
-  Serial.println("loading bmp #2");
   bmpDraw("r.bmp",0,0);
   //delay(10);
 
@@ -120,7 +125,6 @@ void setup(){
   }
   //setup the buttons as inputs
   pinMode(buttonApin, INPUT);
-  pinMode(buttonBpin, INPUT);
 }
 
 void loop(){
@@ -140,19 +144,15 @@ void loop(){
     }
     else mode = 1;
   }
-  //accelerometer
   if (mode == 1) {
     coolantT_oilT_oilP();
   }
-  //oil temp
   if (mode == 2){
     oilT_oilP_coolantT(); 
   }
-  //oil pressure
   if (mode == 3){
     oilP_oilT_coolantT(); 
   }
-  //oil temp and pressure 
   if (mode == 4){
     accelerometer(); 
   }
@@ -169,10 +169,15 @@ void accelerometer(){
   tft.fillScreen(ST7735_BLACK);
   tft.setCursor(0,0);
   tft.setTextColor(ST7735_RED);
-  tft.setTextSize(3);
-  tft.print("X:");
-  tft.setCursor(0,10);
-  tft.print("Y:");
+  tft.setTextSize(2);
+  tft.print("X");
+  tft.setCursor(0,64);
+  tft.print("Y");
+  
+  tft.setTextSize(1);
+  tft.setTextColor(ST7735_GREEN);
+  tft.setCursor(154,0);
+  tft.print("C");
   
   if (startuptempswitch == true){
     while (digitalRead(buttonApin) == HIGH){
@@ -183,12 +188,12 @@ void accelerometer(){
   //test_all_meters();
   while (digitalRead(buttonApin) == LOW){
     startuptempswitch = true;
-    int accelx = ( getAccelerometerData (xval) );
-    int accely = ( getAccelerometerData (yval) );
-
+    int accelx = getAccelerometerData(xval);
+    int accely = getAccelerometerData(yval);
+    int coolantTemp = 130;//getCoolantTemp(coolantPin);
     pospeakcount++;
     negpeakcount++;
-    
+
     peak(accely);
   }
 }
@@ -209,7 +214,7 @@ void coolantT_oilT_oilP(){
 //displays one item as big number and indicator
 //  and two as small numbers and indicators
 void oneBigTwoSmall(){
-return;
+  return;
 }
 
 void temp_meter(){
@@ -223,10 +228,7 @@ void temp_meter(){
   Serial.write(128); 
   long reading = 0;
   while (digitalRead(buttonApin) == LOW){
-    //test_all_meters();
-    if (digitalRead(buttonBpin) == HIGH) {
-      oil_psi_peak = 0;
-    }  
+    //test_all_meters(); 
     //non sensor code
     reading = reading + 10;
     //real reading code
@@ -260,10 +262,6 @@ void temp_and_pressure(){
   long reading2 = 0;
   while (digitalRead(buttonApin) == LOW){
     //test_all_meters();
-    if (digitalRead(buttonBpin) == HIGH) {
-      temp_peak = 0;
-      oil_psi_peak = 0;
-    }
     //reading1 = random(100,350);
     reading1 = lookup_oil_temp(analogRead(tempPin));
     reading2 = lookup_oil_psi( long(analogRead(pressurePin)) );
@@ -284,10 +282,7 @@ void oil_psi_meter(){
   Serial.write(128); 
   long reading = 0;
   while (digitalRead(buttonApin) == LOW){
-    //test_all_meters();
-    if (digitalRead(buttonBpin) == HIGH) {
-      oil_psi_peak = 0;
-    }  
+    //test_all_meters();b 
     //non sensor code
     //reading = reading + 1;
     //real reading code
@@ -757,6 +752,7 @@ uint32_t read32(File f) {
   ((uint8_t *)&result)[3] = f.read(); // MSB
   return result;
 }
+
 
 
 
