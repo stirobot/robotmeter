@@ -199,6 +199,67 @@ void accelerometer(){
 }
 
 void oilT_oilP_coolantT(){
+  //draw initial labels
+  tft.fillScreen(ST7735_BLACK);
+  tft.setTextColor(ST7735_WHITE);
+  tft.setTextSize(1);
+  tft.setCursor(0,0);
+  tft.print("Oil Temp");
+  tft.setTextSize(2);
+  tft.setCursor(0,80);
+  tft.setTextColor(ST7735_WHITE);
+  tft.print("Oil PSI:");
+  tft.setCursor(0,100);
+  tft.setTextColor(ST7735_WHITE);
+  tft.print("Coolant:");
+  
+  int reading;
+  
+  while (digitalRead(buttonApin) == HIGH){
+  }
+  while (digitalRead(buttonApin) == LOW){
+    reading = lookup_oil_temp( long(analogRead(tempPin)) ); //get reading
+    reading = reading / 100;
+    //do color coding of text and warning if necessary
+    if ((reading > 110) && (reading < 130)){
+      tft.setTextColor(ST7735_YELLOW);
+      noTone(2);
+    }
+    if (reading > 130) {
+      tft.setTextColor(ST7735_RED);
+      tone(2,1500);
+    }
+    else {
+      tft.setTextColor(ST7735_GREEN);
+      noTone(2);
+    }
+    //print text
+    tft.setTextSize(7);
+    tft.setCursor(0,20);
+    tft.print(reading);
+    
+    //draw rectangles to do bar graph
+    
+    //add redraw/blanking of old values
+    //small readings:
+    tft.setTextSize(2);
+    reading = lookup_oil_psi( long(analogRead(pressurePin)) );
+    reading = reading / 100;
+    if (reading < 8){
+      tft.setTextColor(ST7735_RED);
+      tone(2,1500);
+    } 
+    if ((reading > 8) && (reading < 12)){
+      tft.setTextColor(ST7735_YELLOW);
+      noTone(2);
+    }
+    else{
+      tft.setTextColor(ST7735_GREEN);
+      noTone(2);
+    }
+    tft.setCursor(100,80);
+    tft.print(reading);
+  }
   return;
 }
 
@@ -208,12 +269,6 @@ void oilP_oilT_coolantT(){
 
 
 void coolantT_oilT_oilP(){
-  return;
-}
-
-//displays one item as big number and indicator
-//  and two as small numbers and indicators
-void oneBigTwoSmall(){
   return;
 }
 
